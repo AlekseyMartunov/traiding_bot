@@ -1,0 +1,39 @@
+version: "3.7"
+services:
+  fluent-bit:
+    container_name: fluent-bit
+    image: fluent/fluent-bit:3.0.3
+    ports:
+      - "5170:5170"
+    volumes:
+      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    depends_on:
+      - elasticsearch
+    networks:
+      - app-net
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:8.13.3
+    ports:
+      - "9200:9200"
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+
+    networks:
+     - app-net
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    ports:
+      - "3000:3000"
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    name: app-net
+    driver: bridge
+
+
