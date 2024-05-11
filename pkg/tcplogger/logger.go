@@ -2,12 +2,12 @@ package tcplogger
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io"
 	"net"
 	"os"
+	"path/filepath"
 	"runtime"
-
-	"github.com/sirupsen/logrus"
 )
 
 type writerHook struct {
@@ -54,7 +54,7 @@ func NewLogger(level string, logServiceAddr string, setReportCaller bool) (*Logg
 		Formatter: &logrus.JSONFormatter{
 			TimestampFormat: "2006-01-02 15:04:05",
 			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
-				return "", fmt.Sprintf("%s:%d", frame.File, frame.Line)
+				return "", getFileNameAndLine(12)
 			},
 		},
 	}
@@ -69,7 +69,7 @@ func NewLogger(level string, logServiceAddr string, setReportCaller bool) (*Logg
 			TimestampFormat:        "2006-01-02 15:04:05",
 			FullTimestamp:          true,
 			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
-				return "", fmt.Sprintf("%s:%d", frame.File, frame.Line)
+				return "", getFileNameAndLine(13)
 			},
 		},
 	}
@@ -112,4 +112,13 @@ func (l *Logger) Fatal(message string) {
 
 func (l *Logger) Panic(message string) {
 	logrus.Panic(message)
+}
+
+func getFileNameAndLine(n int) string {
+	_, file, line, ok := runtime.Caller(n)
+	if !ok {
+		return "getting file name and line error"
+	}
+
+	return fmt.Sprintf("%s:%d", filepath.Base(file), line)
 }
