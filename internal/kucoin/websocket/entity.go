@@ -72,7 +72,13 @@ type ticker struct {
 }
 
 func (t *ticker) toBaseTicker() *entity.Ticker {
-	pair := strings.Split(t.Topic, ":")[1]
+	p := strings.Split(t.Topic, ":")
+	pair := ""
+
+	if len(p) > 1 {
+		pair = p[1]
+	}
+
 	base := entity.Ticker{
 		Pair:  pair,
 		Price: t.Data.Price,
