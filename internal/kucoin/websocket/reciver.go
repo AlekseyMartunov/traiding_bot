@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"tradingbot/internal/basicentity/entity"
+	"tradingbot/internal/kucoin/entity"
 
 	"github.com/gorilla/websocket"
 )
@@ -169,6 +169,8 @@ func (r *Receiver) setConfigForWSConnection(url string) error {
 	}
 
 	r.config = configResponse
+	fmt.Println(configResponse)
+	r.log.Info("kucoin websocket config successfully received")
 	return nil
 }
 
@@ -214,20 +216,23 @@ func (r *Receiver) subscribe() error {
 	sub := subscribeMessage{
 		Id:             1234567890,
 		Type:           "subscribe",
-		Topic:          fmt.Sprintf("%s:%s", "/market/ticker", strings.Join(r.pairs, ",")),
+		Topic:          fmt.Sprintf("%s:%s", "/order/ticker", strings.Join(r.pairs, ",")),
 		PrivateChannel: false,
 		Response:       false,
 	}
 
 	b, err := json.Marshal(sub)
 	if err != nil {
+		r.log.Error(err.Error())
 		return err
 	}
 
 	err = r.conn.WriteMessage(websocket.TextMessage, b)
 	if err != nil {
+		r.log.Error(err.Error())
 		return err
 	}
+	r.log.Info("kucoin websocket successfully subscribed")
 
 	return nil
 }

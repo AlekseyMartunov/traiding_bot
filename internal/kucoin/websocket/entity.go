@@ -2,7 +2,8 @@ package kucoinreceiver
 
 import (
 	"strings"
-	"tradingbot/internal/basicentity/entity"
+
+	"tradingbot/internal/kucoin/entity"
 )
 
 // WsConfigResponse type is returned by the exchange

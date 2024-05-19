@@ -3,7 +3,8 @@ package infra
 import (
 	"context"
 	"fmt"
-	kucoinreceiver "tradingbot/internal/kucoin/websocket"
+
+	"tradingbot/internal/kucoin/websocket"
 	"tradingbot/pkg/tcplogger"
 )
 
