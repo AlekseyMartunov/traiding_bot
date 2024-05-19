@@ -19,7 +19,10 @@ const (
 	configURl = "https://api.kucoin.com/api/v1/bullet-public"
 )
 
-var notMessageError = errors.New("not a ticker message error")
+var (
+	notMessageError = errors.New("not a ticker message error")
+	subscribeErr    = errors.New("kucoin ws subscribing error")
+)
 
 type logger interface {
 	Trace(message string)
@@ -169,7 +172,6 @@ func (r *Receiver) setConfigForWSConnection(url string) error {
 	}
 
 	r.config = configResponse
-	fmt.Println(configResponse)
 	r.log.Info("kucoin websocket config successfully received")
 	return nil
 }
@@ -216,9 +218,9 @@ func (r *Receiver) subscribe() error {
 	sub := subscribeMessage{
 		Id:             1234567890,
 		Type:           "subscribe",
-		Topic:          fmt.Sprintf("%s:%s", "/order/ticker", strings.Join(r.pairs, ",")),
+		Topic:          fmt.Sprintf("%s:%s", "/market/ticker", strings.Join(r.pairs, ",")),
 		PrivateChannel: false,
-		Response:       false,
+		Response:       true,
 	}
 
 	b, err := json.Marshal(sub)
@@ -232,6 +234,25 @@ func (r *Receiver) subscribe() error {
 		r.log.Error(err.Error())
 		return err
 	}
+
+	_, b, err = r.conn.ReadMessage()
+	if err != nil {
+		r.log.Error(err.Error())
+		return err
+	}
+
+	infoMessage := infoWSMessage{}
+
+	err = json.Unmarshal(b, &infoMessage)
+	if err != nil {
+		r.log.Error(err.Error())
+		return err
+	}
+
+	if infoMessage.Id != "1234567890" && infoMessage.Type != "ack" {
+		return subscribeErr
+	}
+
 	r.log.Info("kucoin websocket successfully subscribed")
 
 	return nil
