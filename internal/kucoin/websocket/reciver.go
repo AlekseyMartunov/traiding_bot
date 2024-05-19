@@ -210,7 +210,7 @@ func (r *Receiver) createWSConnection() error {
 		)
 	}
 
-	r.log.Info("websocket connection for kucoin successfully created")
+	r.log.Info("kucoin websocket connection successfully created")
 	return nil
 }
 
