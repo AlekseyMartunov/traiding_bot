@@ -23,7 +23,6 @@ type config interface {
 	Secret() string
 	Version() string
 	PassPhrase() string
-	AccountId() string
 }
 
 type logger interface {

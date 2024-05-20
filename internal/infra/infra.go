@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"fmt"
+	config2 "tradingbot/internal/kucoin/config"
 
 	"tradingbot/internal/kucoin/websocket"
 	"tradingbot/pkg/tcplogger"
@@ -14,6 +15,12 @@ func RunApp(ctx context.Context) error {
 		return fmt.Errorf("creation logger error: %w", err)
 	}
 	defer logger.Close()
+
+	config := config2.NewConfig()
+	err = config.ParseEnvironment()
+	if err != nil {
+		return err
+	}
 
 	kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", logger, []string{"BTC-USDT", "ETH-USDT"})
 	if err != nil {
