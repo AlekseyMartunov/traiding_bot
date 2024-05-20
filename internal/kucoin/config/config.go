@@ -2,6 +2,8 @@ package config
 
 import (
 	"errors"
+	"fmt"
+	"github.com/joho/godotenv"
 	"os"
 )
 
@@ -16,6 +18,11 @@ func NewConfig() *Config {
 }
 
 func (c *Config) ParseEnvironment() error {
+	err := godotenv.Load()
+	if err != nil {
+		return fmt.Errorf("error loading .env file %w", err)
+	}
+
 	if key, ok := os.LookupEnv("KEY"); ok {
 		c.key = key
 	} else {
