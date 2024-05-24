@@ -112,7 +112,7 @@ func (p *KucoinMarketPlacer) createHeaders(method, url, body string) map[string]
 	)
 }
 
-func (p *KucoinMarketPlacer) Test() {
+func (p *KucoinMarketPlacer) Test() error {
 	e := "/api/v1/accounts"
 	headers := p.createHeaders(http.MethodGet, e, "")
 	resp, err := p.client.R().SetHeaders(headers).Get(strings.Join([]string{baseEndpoint, e}, ""))
@@ -121,5 +121,7 @@ func (p *KucoinMarketPlacer) Test() {
 	}
 
 	fmt.Println(resp.String())
+
+	return err
 
 }
