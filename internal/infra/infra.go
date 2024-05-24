@@ -22,18 +22,13 @@ func RunApp(ctx context.Context) error {
 		return err
 	}
 
-	//order := entity.MarketOrder{
-	//	ClientOrderID: "123",
-	//	Funds:         5,
-	//	Pair:          "WEST-USDT",
-	//	Side:          entity.Buy,
-	//}
-
-	orderManager := kucoinorders.NewKucoinMarketPlacer(logger, conf)
-	err = orderManager.Test()
+	orderManager := kucoinorders.NewKucoinOrderManager(logger, conf)
+	i, err := orderManager.GetCurrencyConfig("BTC-USDT")
 	if err != nil {
+		fmt.Println(i)
 		logger.Info(err.Error())
 	}
+	fmt.Println(i)
 
 	kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", logger, []string{"BTC-USDT", "ETH-USDT"})
 	if err != nil {
