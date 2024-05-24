@@ -25,6 +25,7 @@ func createSecretsHeaders(method, url, body, secret, passPhrase, key, version st
 	headers["KC-API-TIMESTAMP"] = timeStamp
 	headers["KC-API-PASSPHRASE"] = passPhraseEncoded
 	headers["KC-API-KEY-VERSION"] = version
+
 	headers["Content-Type"] = "application/json"
 
 	return headers

@@ -11,6 +11,7 @@ type Config struct {
 	key        string
 	secret     string
 	passPhrase string
+	version    string
 }
 
 func NewConfig() *Config {
@@ -41,6 +42,12 @@ func (c *Config) ParseEnvironment() error {
 		return errors.New("not found PASS_PHRASE in environment")
 	}
 
+	if key, ok := os.LookupEnv("VERSION"); ok {
+		c.version = key
+	} else {
+		return errors.New("not found VERSION in environment")
+	}
+
 	return nil
 }
 
@@ -54,4 +61,8 @@ func (c *Config) Secret() string {
 
 func (c *Config) PassPhrase() string {
 	return c.passPhrase
+}
+
+func (c *Config) Version() string {
+	return c.version
 }
