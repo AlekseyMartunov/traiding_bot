@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"tradingbot/internal/kucoin/config"
-	kucoinorders "tradingbot/internal/kucoin/http/order"
+	kucoinaccount "tradingbot/internal/kucoin/http/account"
 	"tradingbot/internal/kucoin/websocket"
 	"tradingbot/pkg/tcplogger"
 )
@@ -22,13 +22,16 @@ func RunApp(ctx context.Context) error {
 		return err
 	}
 
-	orderManager := kucoinorders.NewKucoinOrderManager(logger, conf)
-	i, err := orderManager.GetCurrencyConfig("BTC-USDT")
-	if err != nil {
-		fmt.Println(i)
-		logger.Info(err.Error())
-	}
-	fmt.Println(i)
+	//orderManager := kucoinorders.NewKucoinOrderManager(logger, conf)
+	//i, err := orderManager.GetCurrencyConfig("BTC-USDT")
+	//if err != nil {
+	//	fmt.Println(i)
+	//	logger.Info(err.Error())
+	//}
+	//fmt.Println(i)
+
+	accountManager := kucoinaccount.NewAccountManager(logger, conf)
+	accountManager.GetAccountInfo()
 
 	kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", logger, []string{"BTC-USDT", "ETH-USDT"})
 	if err != nil {

@@ -11,8 +11,8 @@ import (
 	"tradingbot/internal/kucoin/entity"
 )
 
-func (om *KucoinOrderManager) PlaceMarketOrder(order *entity.MarketOrder) error {
-	body := marketOrderForRequest{
+func (om *KucoinOrderManager) PlaceMarketOrder(order *kucoinentity.MarketOrder) error {
+	body := marketOrderJSON{
 		ClientOrderID: order.ClientOrderID,
 		Side:          order.Side,
 		Symbol:        order.Pair,
@@ -25,7 +25,6 @@ func (om *KucoinOrderManager) PlaceMarketOrder(order *entity.MarketOrder) error 
 		om.log.Error(err.Error())
 		return err
 	}
-	fmt.Println(string(b))
 
 	headers := om.createHeaders(http.MethodPost, endpoint, string(b))
 
@@ -40,11 +39,11 @@ func (om *KucoinOrderManager) PlaceMarketOrder(order *entity.MarketOrder) error 
 	}
 
 	if response.StatusCode() != 200 {
-		om.log.Info(fmt.Sprintf("body: %s, code: %d", response.String(), response.StatusCode()))
+		om.log.Error(fmt.Sprintf("body: %s, code: %d", response.String(), response.StatusCode()))
 		return kucoinerrors.StatusCodeIsNot200
 	}
 
-	respOrder := responseOrder{}
+	respOrder := responseOrderJSON{}
 
 	err = json.Unmarshal(response.Body(), &respOrder)
 	if err != nil {
@@ -53,7 +52,6 @@ func (om *KucoinOrderManager) PlaceMarketOrder(order *entity.MarketOrder) error 
 	}
 
 	order.OrderID = respOrder.Data.OrderId
-	fmt.Println(response.String())
 
 	return nil
 }

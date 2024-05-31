@@ -3,7 +3,7 @@ package kucoinreceiver
 import (
 	"strings"
 
-	"tradingbot/internal/kucoin/entity"
+	kucoinentity "tradingbot/internal/kucoin/entity"
 )
 
 // WsConfigResponse type is returned by the exchange
@@ -72,7 +72,7 @@ type ticker struct {
 	Subject string `json:"subject"`
 }
 
-func (t *ticker) toBaseTicker() *entity.Ticker {
+func (t *ticker) toBaseTicker() *kucoinentity.Ticker {
 	p := strings.Split(t.Topic, ":")
 	pair := ""
 
@@ -80,7 +80,7 @@ func (t *ticker) toBaseTicker() *entity.Ticker {
 		pair = p[1]
 	}
 
-	base := entity.Ticker{
+	base := kucoinentity.Ticker{
 		Pair:  pair,
 		Price: t.Data.Price,
 	}

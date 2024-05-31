@@ -67,8 +67,8 @@ func NewReceiver(url string, l logger, pairs []string) (*Receiver, error) {
 	return &r, nil
 }
 
-func (r *Receiver) Run(ctx context.Context) <-chan *entity.Ticker {
-	ch := make(chan *entity.Ticker)
+func (r *Receiver) Run(ctx context.Context) <-chan *kucoinentity.Ticker {
+	ch := make(chan *kucoinentity.Ticker)
 	r.ping(ctx)
 
 	go func() {
@@ -126,7 +126,7 @@ func (r *Receiver) ping(ctx context.Context) {
 	}()
 }
 
-func (r *Receiver) handleMessage(b []byte) (*entity.Ticker, error) {
+func (r *Receiver) handleMessage(b []byte) (*kucoinentity.Ticker, error) {
 	t := ticker{}
 	json.Unmarshal(b, &t)
 
