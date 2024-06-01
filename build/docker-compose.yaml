@@ -31,9 +31,20 @@ services:
     networks:
       - app-net
 
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: "test"
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "test"
+    ports:
+      - "5432:5432"
+
 networks:
   app-net:
     name: app-net
     driver: bridge
 
 
+# to run migrations
+# goose -dir ./migrations postgres "postgres://test:test@localhost:5432/test" up

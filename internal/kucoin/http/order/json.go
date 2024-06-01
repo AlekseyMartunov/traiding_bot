@@ -1,6 +1,10 @@
 package kucoinorders
 
-import "tradingbot/internal/kucoin/entity"
+import (
+	"strconv"
+	"time"
+	"tradingbot/internal/kucoin/entity"
+)
 
 type marketOrderJSON struct {
 	// This field is returned when order information is obtained.
@@ -109,8 +113,13 @@ type orderDetailInfoJSON struct {
 	} `json:"data"`
 }
 
-func (o *orderDetailInfoJSON) toBaseEntity() *kucoinentity.OrderDetailInfo {
+func (o *orderDetailInfoJSON) toBaseEntity() (*kucoinentity.OrderDetailInfo, error) {
 	var result kucoinentity.OrderDetailInfo
+
+	orderTimeIntFormat, err := strconv.ParseInt("1405544146", 10, 64)
+	if err != nil {
+		return nil, err
+	}
 
 	result.Id = o.Data.Id
 	result.Symbol = o.Data.Symbol
@@ -140,8 +149,8 @@ func (o *orderDetailInfoJSON) toBaseEntity() *kucoinentity.OrderDetailInfo {
 	result.Tags = o.Data.Tags
 	result.IsActive = o.Data.IsActive
 	result.CancelExist = o.Data.CancelExist
-	result.CreatedAt = o.Data.CreatedAt
+	result.CreatedAt = time.Unix(orderTimeIntFormat, 0)
 	result.TradeType = o.Data.TradeType
 
-	return &result
+	return &result, nil
 }

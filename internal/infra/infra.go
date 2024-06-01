@@ -3,8 +3,11 @@ package infra
 import (
 	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"time"
 	"tradingbot/internal/kucoin/config"
-	kucoinaccount "tradingbot/internal/kucoin/http/account"
+	postgresrepo "tradingbot/internal/kucoin/db/postgres"
+	kucoinentity "tradingbot/internal/kucoin/entity"
 	"tradingbot/internal/kucoin/websocket"
 	"tradingbot/pkg/tcplogger"
 )
@@ -23,15 +26,38 @@ func RunApp(ctx context.Context) error {
 	}
 
 	//orderManager := kucoinorders.NewKucoinOrderManager(logger, conf)
-	//i, err := orderManager.GetCurrencyConfig("BTC-USDT")
+	//i, err := orderManager.GetOrderDetail("")
 	//if err != nil {
 	//	fmt.Println(i)
 	//	logger.Info(err.Error())
 	//}
 	//fmt.Println(i)
 
-	accountManager := kucoinaccount.NewAccountManager(logger, conf)
-	accountManager.GetAccountInfo()
+	//accountManager := kucoinaccount.NewAccountManager(logger, conf)
+
+	test := kucoinentity.OrderDetailInfo{
+		Id:          "48jdshdjsnd",
+		Side:        "Sell",
+		ClientOid:   "clientoid",
+		Symbol:      "eth-BTC",
+		Funds:       "200",
+		Fee:         "123",
+		FeeCurrency: "USTD",
+		CreatedAt:   time.Now(),
+	}
+
+	dsn := "postgres://test:test@localhost:5432/test"
+	pool, err := pgxpool.New(ctx, dsn)
+	if err != nil {
+		return err
+	}
+
+	repo := postgresrepo.NewStorage(pool)
+
+	err = repo.OpenMarketOrder(ctx, &test)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", logger, []string{"BTC-USDT", "ETH-USDT"})
 	if err != nil {

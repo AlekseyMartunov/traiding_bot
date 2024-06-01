@@ -35,5 +35,5 @@ func (om *KucoinOrderManager) GetOrderDetail(orderID string) (*kucoinentity.Orde
 		return nil, err
 	}
 
-	return info.toBaseEntity(), nil
+	return info.toBaseEntity()
 }

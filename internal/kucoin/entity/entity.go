@@ -28,35 +28,6 @@ type MarketOrder struct {
 	Time  time.Time
 }
 
-type AccountInfo struct {
-	ID        string
-	Currency  string
-	Type      string
-	Balance   float64
-	Available float64
-	Holds     float64
-}
-
-type CurrencyConfig struct {
-	Symbol          string
-	Name            string
-	BaseCurrency    string
-	QuoteCurrency   string
-	FeeCurrency     string
-	Market          string
-	BaseMinSize     string
-	QuoteMinSize    string
-	BaseMaxSize     string
-	QuoteMaxSize    string
-	BaseIncrement   string
-	QuoteIncrement  string
-	PriceIncrement  string
-	PriceLimitRate  string
-	MinFunds        string
-	IsMarginEnabled bool
-	EnableTrading   bool
-}
-
 type OrderDetailInfo struct {
 	Id            string
 	Symbol        string
@@ -86,6 +57,35 @@ type OrderDetailInfo struct {
 	Tags          interface{}
 	IsActive      bool
 	CancelExist   bool
-	CreatedAt     int64
+	CreatedAt     time.Time
 	TradeType     string
+}
+
+type AccountInfo struct {
+	ID        string
+	Currency  string
+	Type      string
+	Balance   float64
+	Available float64
+	Holds     float64
+}
+
+type CurrencyConfig struct {
+	Symbol          string
+	Name            string
+	BaseCurrency    string
+	QuoteCurrency   string
+	FeeCurrency     string
+	Market          string
+	BaseMinSize     string
+	QuoteMinSize    string
+	BaseMaxSize     string
+	QuoteMaxSize    string
+	BaseIncrement   string
+	QuoteIncrement  string
+	PriceIncrement  string
+	PriceLimitRate  string
+	MinFunds        string
+	IsMarginEnabled bool
+	EnableTrading   bool
 }
