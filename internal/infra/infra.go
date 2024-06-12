@@ -8,7 +8,6 @@ import (
 	"tradingbot/internal/kucoin/config"
 	postgresrepo "tradingbot/internal/kucoin/db/postgres"
 	kucoinentity "tradingbot/internal/kucoin/entity"
-	"tradingbot/internal/kucoin/websocket"
 	"tradingbot/pkg/tcplogger"
 )
 
@@ -22,7 +21,30 @@ func RunApp(ctx context.Context) error {
 	conf := config.NewConfig()
 	err = conf.ParseEnvironment()
 	if err != nil {
-		return err
+		logger.Error(err.Error())
+		return fmt.Errorf("parse config error: %w", err)
+	}
+
+	pool, err := pgxpool.New(ctx, "postgres://test:test@localhost:5432/test")
+	if err != nil {
+		return fmt.Errorf("connect to db error: %w", err)
+	}
+
+	storage := postgresrepo.NewStorage(pool)
+	test := kucoinentity.OrderDetailInfo{
+		Id:          "48jdshdjsnd",
+		Side:        "Sell",
+		ClientOid:   "clientoid",
+		Symbol:      "eth-BTC",
+		Funds:       "200",
+		Fee:         "123",
+		FeeCurrency: "USTD",
+		CreatedAt:   time.Now(),
+	}
+
+	err = storage.CloseMarketOrder(ctx, "bot1", &test)
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	//orderManager := kucoinorders.NewKucoinOrderManager(logger, conf)
@@ -35,44 +57,39 @@ func RunApp(ctx context.Context) error {
 
 	//accountManager := kucoinaccount.NewAccountManager(logger, conf)
 
-	test := kucoinentity.OrderDetailInfo{
-		Id:          "48jdshdjsnd",
-		Side:        "Sell",
-		ClientOid:   "clientoid",
-		Symbol:      "eth-BTC",
-		Funds:       "200",
-		Fee:         "123",
-		FeeCurrency: "USTD",
-		CreatedAt:   time.Now(),
-	}
+	//order := kucoinentity.MarketOrder{
+	//	OrderID:       "",
+	//	ClientOrderID: "84584",
+	//	Side:          kucoinentity.Sell,
+	//	Funds:         6.45,
+	//	Size:          0,
+	//	Pair:          "WEST-USDT",
+	//	Time:          time.Time{},
+	//}
+	//
+	//orderManager := kucoinorders.NewKucoinOrderManager(logger, conf)
+	//
+	//err = orderManager.PlaceMarketOrder(&order)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//
+	//fmt.Println(orderManager.GetCurrencyConfig("WEST-USDT"))
 
-	dsn := "postgres://test:test@localhost:5432/test"
-	pool, err := pgxpool.New(ctx, dsn)
-	if err != nil {
-		return err
-	}
-
-	repo := postgresrepo.NewStorage(pool)
-
-	err = repo.OpenMarketOrder(ctx, &test)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", logger, []string{"BTC-USDT", "ETH-USDT"})
-	if err != nil {
-		logger.Error(err.Error())
-		return fmt.Errorf("creation kucoin websocket reciver error: %w", err)
-	}
-	ch := kucoinWSReceiver.Run(ctx)
-
-	for {
-		select {
-		case <-ctx.Done():
-		case t := <-ch:
-			fmt.Println(t)
-		}
-	}
+	//kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", logger, []string{"BTC-USDT", "ETH-USDT", "SOL-USDT"})
+	//if err != nil {
+	//	logger.Error(err.Error())
+	//	return fmt.Errorf("creation kucoin websocket reciver error: %w", err)
+	//}
+	//ch := kucoinWSReceiver.Run(ctx)
+	//
+	//for {
+	//	select {
+	//	case <-ctx.Done():
+	//	case t := <-ch:
+	//		fmt.Println(t)
+	//	}
+	//}
 
 	return nil
 }

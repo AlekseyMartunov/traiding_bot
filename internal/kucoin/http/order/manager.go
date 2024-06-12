@@ -11,6 +11,10 @@ const (
 	baseEndpoint       = "https://api.kucoin.com"
 )
 
+const (
+	successfulCode = "200000"
+)
+
 type config interface {
 	Key() string
 	Secret() string

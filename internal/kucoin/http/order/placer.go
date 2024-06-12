@@ -51,6 +51,11 @@ func (om *KucoinOrderManager) PlaceMarketOrder(order *kucoinentity.MarketOrder) 
 		return err
 	}
 
+	if respOrder.Code != successfulCode {
+		om.log.Error(fmt.Sprintf("body: %s, code: %d", response.String(), response.StatusCode()))
+		return kucoinerrors.StatusCodeIsNot200
+	}
+
 	order.OrderID = respOrder.Data.OrderId
 
 	return nil

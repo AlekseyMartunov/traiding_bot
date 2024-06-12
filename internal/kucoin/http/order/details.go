@@ -35,5 +35,10 @@ func (om *KucoinOrderManager) GetOrderDetail(orderID string) (*kucoinentity.Orde
 		return nil, err
 	}
 
+	if info.Code != successfulCode {
+		om.log.Error(fmt.Sprintf("body: %s, code: %d", response.String(), response.StatusCode()))
+		return nil, kucoinerrors.StatusCodeIsNot200
+	}
+
 	return info.toBaseEntity()
 }
