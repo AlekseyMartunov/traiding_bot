@@ -1,4 +1,5 @@
-package kucoinorders
+// Package kucoinheader contain logic to create secret header and signature.
+package kucoinheader
 
 import (
 	"crypto/hmac"
@@ -9,7 +10,8 @@ import (
 	"time"
 )
 
-func createSecretsHeaders(method, url, body, secret, passPhrase, key, version string) map[string]string {
+// CreateSecretsHeaders creates the secret values needed for https requests to kucoin.
+func CreateSecretsHeaders(method, url, body, secret, passPhrase, key, version string) map[string]string {
 	headers := make(map[string]string)
 
 	dur := time.Now().Add(1 * time.Second).UnixMilli()

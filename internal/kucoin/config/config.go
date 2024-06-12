@@ -1,3 +1,4 @@
+// Package config contains config struct.
 package config
 
 import (
@@ -7,6 +8,7 @@ import (
 	"os"
 )
 
+// Config contains secret keys for connection to kucoin and another services such as DB.
 type Config struct {
 	key        string
 	secret     string
@@ -18,6 +20,7 @@ func NewConfig() *Config {
 	return &Config{}
 }
 
+// ParseEnvironment saves secret keys from .env file into config struct.
 func (c *Config) ParseEnvironment() error {
 	err := godotenv.Load()
 	if err != nil {

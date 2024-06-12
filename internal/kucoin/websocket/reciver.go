@@ -1,3 +1,12 @@
+// Package kucoinreceiver contains the implementation of the client's
+// websocket to obtain prices for pairs.
+//
+// four steps to set up a websocket connection:
+// 1 - make a http request to get config message for creating ws connection.
+// 2 - using the token and endpoint from config message to make a WS connection.
+// 3 - after a certain time, which is obtained from the config,
+// send a ping message to the connection so that the server does not close the connection.
+// 4 - to subscribe to receive the necessary information, send the required connection pairs.
 package kucoinreceiver
 
 import (
@@ -20,8 +29,8 @@ const (
 )
 
 var (
-	notMessageError = errors.New("not a ticker message error")
-	subscribeErr    = errors.New("kucoin ws subscribing error")
+	notTickerMessageError = errors.New("not a ticker message error")
+	subscribeErr          = errors.New("kucoin ws subscribing error")
 )
 
 type logger interface {
@@ -67,6 +76,7 @@ func NewReceiver(url string, l logger, pairs []string) (*Receiver, error) {
 	return &r, nil
 }
 
+// Run send ticker message in to chan.
 func (r *Receiver) Run(ctx context.Context) <-chan *kucoinentity.Ticker {
 	ch := make(chan *kucoinentity.Ticker)
 	r.ping(ctx)
@@ -88,7 +98,7 @@ func (r *Receiver) Run(ctx context.Context) <-chan *kucoinentity.Ticker {
 
 				t, err := r.handleMessage(b)
 				if err != nil {
-					if !errors.Is(err, notMessageError) {
+					if !errors.Is(err, notTickerMessageError) {
 						r.log.Warn(err.Error())
 					}
 					break
@@ -100,6 +110,7 @@ func (r *Receiver) Run(ctx context.Context) <-chan *kucoinentity.Ticker {
 	return ch
 }
 
+// ping sends a ping message every few seconds to maintain the connection.
 func (r *Receiver) ping(ctx context.Context) {
 	d := time.Duration((r.config.Data.InstanceServers[0].PingInterval / 1000) / 2)
 	ticker := time.NewTicker(d * time.Second)
@@ -126,24 +137,31 @@ func (r *Receiver) ping(ctx context.Context) {
 	}()
 }
 
+// handleMessage checks the received message and returns only the ticker message,
+// all service messages will be skipped.
+//
+// The server responds to every ping message,
+// so every few seconds we receive a response to a ping message,
+// this response will be skipped.
 func (r *Receiver) handleMessage(b []byte) (*kucoinentity.Ticker, error) {
 	t := ticker{}
 	json.Unmarshal(b, &t)
 
 	switch t.Type {
 	case "pong":
-		return nil, notMessageError
+		return nil, notTickerMessageError
 
 	case "ack":
-		return nil, notMessageError
+		return nil, notTickerMessageError
 
 	case "message":
 		return t.toBaseTicker(), nil
 	}
 
-	return nil, notMessageError
+	return nil, notTickerMessageError
 }
 
+// setConfigForWSConnection make a http request to get config message for creating ws connection.
 func (r *Receiver) setConfigForWSConnection(url string) error {
 	configResponse := wsConfigResponse{}
 
@@ -176,6 +194,8 @@ func (r *Receiver) setConfigForWSConnection(url string) error {
 	return nil
 }
 
+// createWSConnection create WS connection using token and endpoint from config message.
+// After creating the connection server, send a welcome message to test the connection.
 func (r *Receiver) createWSConnection() error {
 	token := r.config.Data.Token
 	endpoint := r.config.Data.InstanceServers[0].Endpoint
@@ -214,6 +234,7 @@ func (r *Receiver) createWSConnection() error {
 	return nil
 }
 
+// subscribe tells the server which pair we need to subscribe to.
 func (r *Receiver) subscribe() error {
 	sub := subscribeMessage{
 		Id:             1234567890,

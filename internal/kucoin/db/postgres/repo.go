@@ -1,3 +1,4 @@
+// Package postgresrepo contains the logic for storing information in the postgres database.
 package postgresrepo
 
 import (

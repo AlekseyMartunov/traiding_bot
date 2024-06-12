@@ -11,6 +11,7 @@ import (
 	"tradingbot/internal/kucoin/entity"
 )
 
+// PlaceMarketOrder takes the MarketOrder struct and places it in kucoin.
 func (om *KucoinOrderManager) PlaceMarketOrder(order *kucoinentity.MarketOrder) error {
 	body := marketOrderJSON{
 		ClientOrderID: order.ClientOrderID,

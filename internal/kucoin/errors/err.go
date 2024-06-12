@@ -1,3 +1,4 @@
+// Package kucoinerrors contains errors which may appear when bots work.
 package kucoinerrors
 
 import "errors"

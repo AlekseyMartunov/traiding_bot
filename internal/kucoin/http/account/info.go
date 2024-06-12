@@ -6,13 +6,24 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"tradingbot/internal/kucoin/entity"
 
+	"tradingbot/internal/kucoin/entity"
 	kucoinerrors "tradingbot/internal/kucoin/errors"
+	kucoinheader "tradingbot/internal/kucoin/http/header"
 )
 
+// GetAccountInfo returns info about all currency accounts.
 func (am *AccountManager) GetAccountInfo() ([]*kucoinentity.AccountInfo, error) {
-	headers := am.createHeaders(http.MethodGet, accountEndpoint, "")
+	headers := kucoinheader.CreateSecretsHeaders(
+		http.MethodGet,
+		accountEndpoint,
+		"",
+		am.cfg.Secret(),
+		am.cfg.PassPhrase(),
+		am.cfg.Key(),
+		am.cfg.Version(),
+	)
+
 	resp, err := am.client.R().
 		SetHeaders(headers).
 		Get(strings.Join([]string{baseEndpoint, accountEndpoint}, ""))

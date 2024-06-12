@@ -1,7 +1,9 @@
+// Package kucoinentity contains all main entity necessary to work kucoin bots.
 package kucoinentity
 
 import "time"
 
+// Side can only have two meanings: sell or buy.
 type Side string
 
 const (
@@ -9,11 +11,13 @@ const (
 	Buy  Side = "buy"
 )
 
+// Ticker is used to obtain information about the currency and price.
 type Ticker struct {
 	Pair  string
 	Price string
 }
 
+// MarketOrder is used to place an order on the kucoin exchange.
 type MarketOrder struct {
 	// order id returned by server, ClientOrderID is different from the OrderID
 	OrderID string
@@ -21,13 +25,20 @@ type MarketOrder struct {
 	// client side uuid for order
 	ClientOrderID string
 
-	Side  Side
+	// sell or buy
+	Side Side
+
+	// Funds field refers to the funds for the priced asset (the asset name written latter) of the trading pair.
+	// Example: "funds: 25,  pair: BTC-USD, side: buy" means that we want buy BTC by 25 USDT
 	Funds float64
-	Size  float64
-	Pair  string
-	Time  time.Time
+
+	// BTC-USDT
+	Pair string
+
+	Time time.Time
 }
 
+// OrderDetailInfo contains all info about the completed order.
 type OrderDetailInfo struct {
 	Id            string
 	Symbol        string
@@ -61,6 +72,7 @@ type OrderDetailInfo struct {
 	TradeType     string
 }
 
+// AccountInfo contains info about currency accounts.
 type AccountInfo struct {
 	ID        string
 	Currency  string
@@ -70,6 +82,7 @@ type AccountInfo struct {
 	Holds     float64
 }
 
+// CurrencyConfig contains info on purchase and sales volumes.
 type CurrencyConfig struct {
 	Symbol          string
 	Name            string

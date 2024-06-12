@@ -10,6 +10,7 @@ import (
 	kucoinerrors "tradingbot/internal/kucoin/errors"
 )
 
+// GetOrderDetail allows you to get info about the completed order.
 func (om *KucoinOrderManager) GetOrderDetail(orderID string) (*kucoinentity.OrderDetailInfo, error) {
 	url := strings.Join([]string{endpoint, "/", orderID}, "")
 	headers := om.createHeaders(http.MethodGet, url, "")

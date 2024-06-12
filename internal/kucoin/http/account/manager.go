@@ -1,10 +1,17 @@
+// Package kucoinaccount allows you to make requests to the kucoin exchange
+// to obtain info about currency accounts.
 package kucoinaccount
 
 import "github.com/go-resty/resty/v2"
 
 const (
-	baseEndpoint    = "https://api.kucoin.com"
-	accountEndpoint = "/api/v1/accounts"
+	baseEndpoint       = "https://api.kucoin.com"
+	symbolListEndpoint = "/api/v2/symbols"
+	accountEndpoint    = "/api/v1/accounts"
+)
+
+const (
+	successfulCode = "200000"
 )
 
 type config interface {
@@ -28,22 +35,10 @@ type AccountManager struct {
 	client *resty.Client
 }
 
-func NewAccountManager(l logger, c config) *AccountManager {
+func New(l logger, c config) *AccountManager {
 	return &AccountManager{
 		log:    l,
 		cfg:    c,
 		client: resty.New(),
 	}
-}
-
-func (am *AccountManager) createHeaders(method, url, body string) map[string]string {
-	return createSecretsHeaders(
-		method,
-		url,
-		body,
-		am.cfg.Secret(),
-		am.cfg.PassPhrase(),
-		am.cfg.Key(),
-		am.cfg.Version(),
-	)
 }

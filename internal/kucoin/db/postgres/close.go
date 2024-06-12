@@ -9,7 +9,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (s *Storage) CloseMarketOrder(ctx context.Context, botName string, o *kucoinentity.OrderDetailInfo) error {
+// CloseMarketPosition save second closing order in to db.
+func (s *Storage) CloseMarketPosition(ctx context.Context, botName string, o *kucoinentity.OrderDetailInfo) error {
 	query1 := `INSERT INTO kucoin_market_order 
     			(order_id, client_order_id, symbol, side, funds, commission, commission_currency, created_time)
 				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
