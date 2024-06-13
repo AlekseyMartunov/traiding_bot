@@ -5,7 +5,6 @@ package kucoinaccount
 import "github.com/go-resty/resty/v2"
 
 const (
-	baseEndpoint       = "https://api.kucoin.com"
 	symbolListEndpoint = "/api/v2/symbols"
 	accountEndpoint    = "/api/v1/accounts"
 )
@@ -19,6 +18,7 @@ type config interface {
 	Secret() string
 	Version() string
 	PassPhrase() string
+	BaseEndpoint() string
 }
 
 type logger interface {

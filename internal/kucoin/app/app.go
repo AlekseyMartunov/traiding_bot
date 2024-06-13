@@ -4,14 +4,9 @@ package kucoinbots
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"tradingbot/internal/kucoin/config"
-	postgresRepo "tradingbot/internal/kucoin/db/postgres"
-	kucoinEntity "tradingbot/internal/kucoin/entity"
+	kucoinaccount "tradingbot/internal/kucoin/http/account"
 	"tradingbot/pkg/tcplogger"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func Run(ctx context.Context) error {
@@ -28,27 +23,30 @@ func Run(ctx context.Context) error {
 		return fmt.Errorf("parse config error: %w", err)
 	}
 
-	pool, err := pgxpool.New(ctx, "postgres://test:test@localhost:5432/test")
-	if err != nil {
-		return fmt.Errorf("connect to db error: %w", err)
-	}
+	accountManager := kucoinaccount.New(logger, conf)
+	accountManager.GetAccountInfo()
 
-	storage := postgresRepo.NewStorage(pool)
-	test := kucoinEntity.OrderDetailInfo{
-		Id:          "48jdshdjsnd",
-		Side:        "Sell",
-		ClientOid:   "clientoid",
-		Symbol:      "eth-BTC",
-		Funds:       "200",
-		Fee:         "123",
-		FeeCurrency: "USTD",
-		CreatedAt:   time.Now(),
-	}
+	//pool, err := pgxpool.New(ctx, "postgres://test:test@localhost:5432/test")
+	//if err != nil {
+	//	return fmt.Errorf("connect to db error: %w", err)
+	//}
 
-	err = storage.CloseMarketPosition(ctx, "bot1", &test)
-	if err != nil {
-		fmt.Println(err)
-	}
+	//storage := postgresRepo.NewStorage(pool)
+	//test := kucoinEntity.OrderDetailInfo{
+	//	Id:          "48jdshdjsnd",
+	//	Side:        "Sell",
+	//	ClientOid:   "clientoid",
+	//	Symbol:      "eth-BTC",
+	//	Funds:       "200",
+	//	Fee:         "123",
+	//	FeeCurrency: "USTD",
+	//	CreatedAt:   time.Now(),
+	//}
+	//
+	//err = storage.CloseMarketPosition(ctx, "bot1", &test)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
 
 	//orderManager := kucoinorders.NewKucoinOrderManager(logger, conf)
 	//i, err := orderManager.GetOrderDetail("")

@@ -40,7 +40,7 @@ func (s *Storage) CloseMarketPosition(ctx context.Context, botName string, o *ku
 	tx.Commit(ctx)
 
 	if result.RowsAffected() == 0 {
-		return kucoinerrors.NothingToChange
+		return kucoinerrors.ErrNothingToChange
 	}
 
 	return nil

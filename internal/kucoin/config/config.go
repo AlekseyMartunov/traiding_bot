@@ -10,14 +10,17 @@ import (
 
 // Config contains secret keys for connection to kucoin and another services such as DB.
 type Config struct {
-	key        string
-	secret     string
-	passPhrase string
-	version    string
+	key          string
+	secret       string
+	passPhrase   string
+	version      string
+	baseEndpoint string
 }
 
 func NewConfig() *Config {
-	return &Config{}
+	return &Config{
+		baseEndpoint: "https://api.kucoin.com",
+	}
 }
 
 // ParseEnvironment saves secret keys from .env file into config struct.
@@ -68,4 +71,8 @@ func (c *Config) PassPhrase() string {
 
 func (c *Config) Version() string {
 	return c.version
+}
+
+func (c *Config) BaseEndpoint() string {
+	return c.baseEndpoint
 }

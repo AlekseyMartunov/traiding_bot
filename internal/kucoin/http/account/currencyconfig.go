@@ -11,7 +11,7 @@ import (
 
 // GetCurrencyConfig allows to you to get info on purchase and sales volumes.
 func (am *AccountManager) GetCurrencyConfig(currencyPair string) (*kucoinentity.CurrencyConfig, error) {
-	url := strings.Join([]string{baseEndpoint, symbolListEndpoint, "/", currencyPair}, "")
+	url := strings.Join([]string{am.cfg.BaseEndpoint(), symbolListEndpoint, "/", currencyPair}, "")
 	response, err := am.client.R().
 		Get(url)
 
@@ -22,7 +22,7 @@ func (am *AccountManager) GetCurrencyConfig(currencyPair string) (*kucoinentity.
 
 	if response.StatusCode() != 200 {
 		am.log.Error(fmt.Sprintf("body: %s, code: %d", response.String(), response.StatusCode()))
-		return nil, kucoinerrors.StatusCodeIsNot200
+		return nil, kucoinerrors.ErrStatusCodeIsNot200
 	}
 
 	var info currencyConfigJSON
@@ -35,7 +35,7 @@ func (am *AccountManager) GetCurrencyConfig(currencyPair string) (*kucoinentity.
 
 	if info.Code != successfulCode {
 		am.log.Error(fmt.Sprintf("body: %s, code: %d", response.String(), response.StatusCode()))
-		return nil, kucoinerrors.StatusCodeIsNot200
+		return nil, kucoinerrors.ErrStatusCodeIsNot200
 	}
 
 	return info.toBaseEntity(), nil

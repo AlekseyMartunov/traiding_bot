@@ -2,8 +2,6 @@
 package kucoinorders
 
 import (
-	kucoinheader "tradingbot/internal/kucoin/http/header"
-
 	"github.com/go-resty/resty/v2"
 )
 
@@ -44,16 +42,4 @@ func NewKucoinOrderManager(l logger, c config) *KucoinOrderManager {
 		cfg:    c,
 		client: resty.New(),
 	}
-}
-
-func (om *KucoinOrderManager) createHeaders(method, url, body string) map[string]string {
-	return kucoinheader.CreateSecretsHeaders(
-		method,
-		url,
-		body,
-		om.cfg.Secret(),
-		om.cfg.PassPhrase(),
-		om.cfg.Key(),
-		om.cfg.Version(),
-	)
 }

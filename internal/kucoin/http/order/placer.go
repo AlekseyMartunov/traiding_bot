@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 	"tradingbot/internal/kucoin/errors"
+	kucoinheader "tradingbot/internal/kucoin/http/header"
 
 	"tradingbot/internal/kucoin/entity"
 )
@@ -27,7 +29,16 @@ func (om *KucoinOrderManager) PlaceMarketOrder(order *kucoinentity.MarketOrder) 
 		return err
 	}
 
-	headers := om.createHeaders(http.MethodPost, endpoint, string(b))
+	headers := kucoinheader.CreateSecretsHeaders(
+		http.MethodPost,
+		endpoint,
+		string(b),
+		om.cfg.Secret(),
+		om.cfg.PassPhrase(),
+		om.cfg.Key(),
+		om.cfg.Version(),
+		time.Now(),
+	)
 
 	response, err := om.client.R().
 		SetBody(b).
@@ -41,7 +52,7 @@ func (om *KucoinOrderManager) PlaceMarketOrder(order *kucoinentity.MarketOrder) 
 
 	if response.StatusCode() != 200 {
 		om.log.Error(fmt.Sprintf("body: %s, code: %d", response.String(), response.StatusCode()))
-		return kucoinerrors.StatusCodeIsNot200
+		return kucoinerrors.ErrStatusCodeIsNot200
 	}
 
 	respOrder := responseOrderJSON{}
@@ -54,7 +65,7 @@ func (om *KucoinOrderManager) PlaceMarketOrder(order *kucoinentity.MarketOrder) 
 
 	if respOrder.Code != successfulCode {
 		om.log.Error(fmt.Sprintf("body: %s, code: %d", response.String(), response.StatusCode()))
-		return kucoinerrors.StatusCodeIsNot200
+		return kucoinerrors.ErrStatusCodeIsNot200
 	}
 
 	order.OrderID = respOrder.Data.OrderId

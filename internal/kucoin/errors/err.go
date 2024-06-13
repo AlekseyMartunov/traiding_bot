@@ -4,9 +4,14 @@ package kucoinerrors
 import "errors"
 
 var (
-	StatusCodeIsNot200 = errors.New("response status code not equal 200")
+	ErrStatusCodeIsNot200 = errors.New("response status code not equal 200")
 )
 
 var (
-	NothingToChange = errors.New("in db no rows have changed")
+	ErrUnmarshal = errors.New("unmarshal json error")
+	ErrRecastDTO = errors.New("recast dto error")
+)
+
+var (
+	ErrNothingToChange = errors.New("in db no rows have changed")
 )

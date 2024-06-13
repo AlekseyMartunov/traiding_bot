@@ -11,10 +11,10 @@ import (
 )
 
 // CreateSecretsHeaders creates the secret values needed for https requests to kucoin.
-func CreateSecretsHeaders(method, url, body, secret, passPhrase, key, version string) map[string]string {
+func CreateSecretsHeaders(method, url, body, secret, passPhrase, key, version string, now time.Time) map[string]string {
 	headers := make(map[string]string)
 
-	dur := time.Now().Add(1 * time.Second).UnixMilli()
+	dur := now.Add(1 * time.Second).UnixMilli()
 	timeStamp := strconv.FormatInt(dur, 10)
 
 	signature := strings.Join([]string{timeStamp, method, url, body}, "")
