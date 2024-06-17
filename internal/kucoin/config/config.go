@@ -4,22 +4,25 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/joho/godotenv"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 // Config contains secret keys for connection to kucoin and another services such as DB.
 type Config struct {
-	key          string
-	secret       string
-	passPhrase   string
-	version      string
-	baseEndpoint string
+	key           string
+	secret        string
+	passPhrase    string
+	version       string
+	baseEndpoint  string
+	mlServiceAddr string
 }
 
 func NewConfig() *Config {
 	return &Config{
-		baseEndpoint: "https://api.kucoin.com",
+		baseEndpoint:  "https://api.kucoin.com",
+		mlServiceAddr: "ws://localhost:7500/ws",
 	}
 }
 
@@ -75,4 +78,8 @@ func (c *Config) Version() string {
 
 func (c *Config) BaseEndpoint() string {
 	return c.baseEndpoint
+}
+
+func (c *Config) MlServiceAddr() string {
+	return c.mlServiceAddr
 }

@@ -7,6 +7,7 @@
 // 3 - after a certain time, which is obtained from the config,
 // send a ping message to the connection so that the server does not close the connection.
 // 4 - to subscribe to receive the necessary information, send the required connection pairs.
+
 package kucoinreceiver
 
 import (
@@ -155,7 +156,7 @@ func (r *Receiver) handleMessage(b []byte) (*kucoinentity.Ticker, error) {
 		return nil, notTickerMessageError
 
 	case "message":
-		return t.toBaseTicker(), nil
+		return t.toBaseTicker()
 	}
 
 	return nil, notTickerMessageError

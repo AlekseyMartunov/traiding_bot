@@ -14,7 +14,14 @@ const (
 // Ticker is used to obtain information about the currency and price.
 type Ticker struct {
 	Pair  string
-	Price string
+	Price float64
+}
+
+// MlResult returns from the ьд service and indicates its decisions
+// status true -> buy, status false -> sell
+type MlResult struct {
+	Pair   string
+	Status bool
 }
 
 // MarketOrder is used to place an order on the kucoin exchange.

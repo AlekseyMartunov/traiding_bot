@@ -1,6 +1,7 @@
 package kucoinreceiver
 
 import (
+	"strconv"
 	"strings"
 
 	kucoinentity "tradingbot/internal/kucoin/entity"
@@ -72,7 +73,7 @@ type ticker struct {
 	Subject string `json:"subject"`
 }
 
-func (t *ticker) toBaseTicker() *kucoinentity.Ticker {
+func (t *ticker) toBaseTicker() (*kucoinentity.Ticker, error) {
 	p := strings.Split(t.Topic, ":")
 	pair := ""
 
@@ -80,10 +81,15 @@ func (t *ticker) toBaseTicker() *kucoinentity.Ticker {
 		pair = p[1]
 	}
 
-	base := kucoinentity.Ticker{
-		Pair:  pair,
-		Price: t.Data.Price,
+	price, err := strconv.ParseFloat(t.Data.Price, 64)
+	if err != nil {
+		return nil, err
 	}
 
-	return &base
+	base := kucoinentity.Ticker{
+		Pair:  pair,
+		Price: price,
+	}
+
+	return &base, nil
 }

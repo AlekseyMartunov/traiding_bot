@@ -5,7 +5,8 @@ import (
 	"context"
 	"fmt"
 	"tradingbot/internal/kucoin/config"
-	kucoinaccount "tradingbot/internal/kucoin/http/account"
+	"tradingbot/internal/kucoin/websocket/exchange"
+	ml "tradingbot/internal/kucoin/websocket/prediction"
 	"tradingbot/pkg/tcplogger"
 )
 
@@ -23,8 +24,8 @@ func Run(ctx context.Context) error {
 		return fmt.Errorf("parse config error: %w", err)
 	}
 
-	accountManager := kucoinaccount.New(logger, conf)
-	accountManager.GetAccountInfo()
+	//accountManager := kucoinaccount.New(logger, conf)
+	//accountManager.GetAccountInfo()
 
 	//pool, err := pgxpool.New(ctx, "postgres://test:test@localhost:5432/test")
 	//if err != nil {
@@ -77,20 +78,41 @@ func Run(ctx context.Context) error {
 	//
 	//fmt.Println(orderManager.GetCurrencyConfig("WEST-USDT"))
 
-	//kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", logger, []string{"BTC-USDT", "ETH-USDT", "SOL-USDT"})
-	//if err != nil {
-	//	logger.Error(err.Error())
-	//	return fmt.Errorf("creation kucoin websocket reciver error: %w", err)
-	//}
-	//ch := kucoinWSReceiver.Run(ctx)
-	//
-	//for {
-	//	select {
-	//	case <-ctx.Done():
-	//	case t := <-ch:
-	//		fmt.Println(t)
-	//	}
-	//}
+	mlService, err := ml.New(logger, conf)
+	if err != nil {
+		return err
+	}
+
+	kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", logger, []string{"BTC-USDT", "ETH-USDT", "SOL-USDT"})
+	if err != nil {
+		logger.Error(err.Error())
+		return fmt.Errorf("creation kucoin websocket reciver error: %w", err)
+	}
+	ch := kucoinWSReceiver.Run(ctx)
+
+	go func() {
+		for {
+			res, err := mlService.ReadMessage()
+			fmt.Println("result:", res)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Println(res)
+		}
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+		case t := <-ch:
+			err = mlService.SendMessage(t)
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+		}
+	}
 
 	return nil
 }
