@@ -107,6 +107,26 @@ func TestAccountManager_GetAccountInfo(t *testing.T) {
 					}`))
 			},
 		},
+		{
+			name:        "test-5",
+			description: "check request method (should be GET)",
+			result: []*kucoinentity.AccountInfo{
+				{ID: "124", Currency: "ETH-USDT", Type: "trade", Balance: 300.0, Available: 300.0, Holds: 0.0},
+			},
+			err: nil,
+			handlerFunc: func(writer http.ResponseWriter, request *http.Request) {
+				if request.Method != http.MethodGet {
+					writer.WriteHeader(http.StatusBadRequest)
+					return
+				}
+				writer.WriteHeader(http.StatusOK)
+				writer.Write(
+					[]byte(
+						`{"code":"200000","data":
+					[{"id": "124", "currency": "ETH-USDT", "type": "trade", "balance": "300.0","available":"300.0", "holds": "0.0"}]
+					}`))
+			},
+		},
 	}
 
 	for _, tc := range testCases {
