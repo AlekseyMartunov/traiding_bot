@@ -11,16 +11,14 @@ import (
 )
 
 func Run(ctx context.Context) error {
-	//logger, err := l.NewLogger("trace", "127.0.0.1:5170", true)
-	log, err := logger.New(nil)
-	if err != nil {
-		return fmt.Errorf("creation logger error: %w", err)
-	}
-
-	conf := config.NewConfig()
-	err = conf.ParseEnvironment()
+	conf, err := config.New()
 	if err != nil {
 		return fmt.Errorf("parse config error: %w", err)
+	}
+
+	log, err := logger.New(&conf.Logger)
+	if err != nil {
+		return fmt.Errorf("creation logger error: %w", err)
 	}
 
 	//accountManager := kucoinaccount.New(logger, conf)
@@ -76,10 +74,10 @@ func Run(ctx context.Context) error {
 	//}
 	//
 	//fmt.Println(orderManager.GetCurrencyConfig("WEST-USDT"))
-
-	mlService, err := ml.New(log, conf)
+	fmt.Println(conf)
+	mlService, err := ml.New(log, &conf.MlService)
 	if err != nil {
-		return err
+		return fmt.Errorf("creating ml-service errpr: %w", err)
 	}
 
 	kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", log, []string{"BTC-USDT", "ETH-USDT", "SOL-USDT"})

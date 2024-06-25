@@ -25,9 +25,9 @@ const (
 )
 
 type config interface {
-	ENV() string
-	LogAddr() string
-	Level() string
+	GetEnv() string
+	GetLogAddr() string
+	GetLevel() string
 }
 
 var LevelNames = map[slog.Leveler]string{
@@ -39,15 +39,15 @@ type Logger struct {
 }
 
 func New(c config) (*Logger, error) {
-	switch c.ENV() {
+	switch c.GetEnv() {
 	case prod:
-		conn, err := net.Dial("tcp", c.LogAddr())
+		conn, err := net.Dial("tcp", c.GetLogAddr())
 		if err != nil {
 			return nil, err
 		}
 		ss := slog.New(slog.NewJSONHandler(conn, &slog.HandlerOptions{
 			AddSource:   false,
-			Level:       parseLevel(c.Level()),
+			Level:       parseLevel(c.GetLevel()),
 			ReplaceAttr: replaceEventLevelName,
 		}))
 
@@ -56,7 +56,7 @@ func New(c config) (*Logger, error) {
 	case dev:
 		ss := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 			AddSource:   false,
-			Level:       parseLevel(c.Level()),
+			Level:       parseLevel(c.GetLevel()),
 			ReplaceAttr: replaceEventLevelName,
 		}))
 

@@ -8,7 +8,7 @@ import (
 )
 
 type config interface {
-	MlServiceAddr() string
+	MlAddr() string
 }
 
 type logger interface {
@@ -26,7 +26,7 @@ type PredictionService struct {
 }
 
 func New(l logger, c config) (*PredictionService, error) {
-	wsConn, _, err := websocket.DefaultDialer.Dial(c.MlServiceAddr(), nil)
+	wsConn, _, err := websocket.DefaultDialer.Dial(c.MlAddr(), nil)
 	if err != nil {
 		return nil, err
 	}

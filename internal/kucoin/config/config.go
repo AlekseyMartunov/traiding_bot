@@ -2,84 +2,33 @@
 package config
 
 import (
-	"errors"
 	"fmt"
+	"github.com/ilyakaznacheev/cleanenv"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
-// Config contains secret keys for connection to kucoin and another services such as DB.
 type Config struct {
-	key           string
-	secret        string
-	passPhrase    string
-	version       string
-	baseEndpoint  string
-	mlServiceAddr string
+	DB        `yaml:"database"`
+	Kucoin    `yaml:"kucoin"`
+	Logger    `yaml:"logger"`
+	MlService `yaml:"service"`
 }
 
-func NewConfig() *Config {
-	return &Config{
-		baseEndpoint:  "https://api.kucoin.com",
-		mlServiceAddr: "ws://localhost:7500/ws",
-	}
-}
-
-// ParseEnvironment saves secret keys from .env file into config struct.
-func (c *Config) ParseEnvironment() error {
-	err := godotenv.Load()
-	if err != nil {
-		return fmt.Errorf("error loading .env file %w", err)
+func New() (*Config, error) {
+	configPath, ok := os.LookupEnv("CONFIG_PATH")
+	if !ok {
+		return nil, fmt.Errorf("environment CONFIG_PATH not set")
 	}
 
-	if key, ok := os.LookupEnv("KEY"); ok {
-		c.key = key
-	} else {
-		return errors.New("not found KEY in environment")
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("%w: file %s dose not exists", err, configPath)
 	}
 
-	if key, ok := os.LookupEnv("SECRET"); ok {
-		c.secret = key
-	} else {
-		return errors.New("not found SECRET in environment")
+	var cfg Config
+
+	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+		return nil, fmt.Errorf("")
 	}
 
-	if key, ok := os.LookupEnv("PASS_PHRASE"); ok {
-		c.passPhrase = key
-	} else {
-		return errors.New("not found PASS_PHRASE in environment")
-	}
-
-	if key, ok := os.LookupEnv("VERSION"); ok {
-		c.version = key
-	} else {
-		return errors.New("not found VERSION in environment")
-	}
-
-	return nil
-}
-
-func (c *Config) Key() string {
-	return c.key
-}
-
-func (c *Config) Secret() string {
-	return c.secret
-}
-
-func (c *Config) PassPhrase() string {
-	return c.passPhrase
-}
-
-func (c *Config) Version() string {
-	return c.version
-}
-
-func (c *Config) BaseEndpoint() string {
-	return c.baseEndpoint
-}
-
-func (c *Config) MlServiceAddr() string {
-	return c.mlServiceAddr
+	return &cfg, nil
 }

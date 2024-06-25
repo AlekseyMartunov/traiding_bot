@@ -1,0 +1,16 @@
+database:
+  addr: localhost:5432
+  db_name: postgres
+  password: test
+  username: test
+kucoin:
+  key: 1
+  secret: 1
+  pass_phrase: 1
+  version: 1
+logger:
+  env: dev
+  addr: 127.0.0.1:5170
+  level: LevelInfo # LevelDebug, LevelInfo, LevelWarn, LevelEvent, LevelError
+ml-service:
+  addr: 123
