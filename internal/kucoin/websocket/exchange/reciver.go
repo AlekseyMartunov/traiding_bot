@@ -35,11 +35,11 @@ var (
 )
 
 type logger interface {
-	Trace(message string)
-	Debug(message string)
-	Info(message string)
-	Warn(message string)
-	Error(message string)
+	Debug(msg string, args ...any)
+	Info(msg string, args ...any)
+	Warn(msg string, args ...any)
+	Event(msg string, args ...any)
+	Error(msg string, args ...any)
 }
 
 type Receiver struct {

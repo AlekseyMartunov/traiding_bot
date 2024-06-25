@@ -7,20 +7,19 @@ import (
 	"tradingbot/internal/kucoin/config"
 	"tradingbot/internal/kucoin/websocket/exchange"
 	ml "tradingbot/internal/kucoin/websocket/prediction"
-	"tradingbot/pkg/tcplogger"
+	"tradingbot/pkg/logger"
 )
 
 func Run(ctx context.Context) error {
-	logger, err := tcplogger.NewLogger("trace", "127.0.0.1:5170", true)
+	//logger, err := l.NewLogger("trace", "127.0.0.1:5170", true)
+	log, err := logger.New(nil)
 	if err != nil {
 		return fmt.Errorf("creation logger error: %w", err)
 	}
-	defer logger.Close()
 
 	conf := config.NewConfig()
 	err = conf.ParseEnvironment()
 	if err != nil {
-		logger.Error(err.Error())
 		return fmt.Errorf("parse config error: %w", err)
 	}
 
@@ -78,14 +77,14 @@ func Run(ctx context.Context) error {
 	//
 	//fmt.Println(orderManager.GetCurrencyConfig("WEST-USDT"))
 
-	mlService, err := ml.New(logger, conf)
+	mlService, err := ml.New(log, conf)
 	if err != nil {
 		return err
 	}
 
-	kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", logger, []string{"BTC-USDT", "ETH-USDT", "SOL-USDT"})
+	kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", log, []string{"BTC-USDT", "ETH-USDT", "SOL-USDT"})
 	if err != nil {
-		logger.Error(err.Error())
+		log.Error(err.Error())
 		return fmt.Errorf("creation kucoin websocket reciver error: %w", err)
 	}
 	ch := kucoinWSReceiver.Run(ctx)
