@@ -11,7 +11,7 @@ import (
 
 // GetCurrencyConfig allows to you to get info on purchase and sales volumes.
 func (am *AccountManager) GetCurrencyConfig(currencyPair string) (*kucoinentity.CurrencyConfig, error) {
-	url := strings.Join([]string{am.cfg.BaseEndpoint(), symbolListEndpoint, "/", currencyPair}, "")
+	url := strings.Join([]string{am.cfg.GetBaseEndpoint(), symbolListEndpoint, "/", currencyPair}, "")
 	response, err := am.client.R().
 		Get(url)
 

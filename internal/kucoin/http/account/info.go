@@ -1,7 +1,6 @@
 package kucoinaccount
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -19,16 +18,16 @@ func (am *AccountManager) GetAccountInfo() ([]*kucoinentity.AccountInfo, error) 
 		http.MethodGet,
 		accountEndpoint,
 		"",
-		am.cfg.Secret(),
-		am.cfg.PassPhrase(),
-		am.cfg.Key(),
-		am.cfg.Version(),
+		am.cfg.GetSecret(),
+		am.cfg.GetPassPhrase(),
+		am.cfg.GetKey(),
+		am.cfg.GetVersion(),
 		time.Now(),
 	)
 
 	resp, err := am.client.R().
 		SetHeaders(headers).
-		Get(strings.Join([]string{am.cfg.BaseEndpoint(), accountEndpoint}, ""))
+		Get(strings.Join([]string{am.cfg.GetBaseEndpoint(), accountEndpoint}, ""))
 
 	if err != nil {
 		am.log.Error(err.Error())
@@ -40,26 +39,16 @@ func (am *AccountManager) GetAccountInfo() ([]*kucoinentity.AccountInfo, error) 
 		return nil, kucoinerrors.ErrStatusCodeIsNot200
 	}
 
-	b := bytes.TrimPrefix(resp.Body(), []byte(`{"code":"200000","data":`))
-	b = bytes.TrimSuffix(b, []byte("}"))
-
-	jsonArr := make([]*accountInfoJSON, 0, 0)
-	err = json.Unmarshal(b, &jsonArr)
+	var j accountInfoJSON
+	err = json.Unmarshal(resp.Body(), &j)
 	if err != nil {
 		am.log.Error(err.Error())
-		return nil, kucoinerrors.ErrUnmarshal
+		return nil, err
 	}
 
-	resultArr := make([]*kucoinentity.AccountInfo, 0, len(jsonArr))
-
-	for _, v := range jsonArr {
-		e, err := v.toBaseEntity()
-		if err != nil {
-			am.log.Error(err.Error())
-			return nil, kucoinerrors.ErrRecastDTO
-		}
-		resultArr = append(resultArr, e)
+	if j.Code != successfulCode {
+		am.log.Error(fmt.Sprintf("body: %s, code: %d", resp.String(), j.Code))
 	}
 
-	return resultArr, nil
+	return j.toBaseEntity()
 }

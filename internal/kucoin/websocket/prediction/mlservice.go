@@ -14,7 +14,7 @@ const (
 )
 
 type config interface {
-	MlAddr() string
+	GetMlAddr() string
 }
 
 type logger interface {
@@ -32,7 +32,7 @@ type PredictionService struct {
 }
 
 func New(l logger, c config) (*PredictionService, error) {
-	addr := strings.Join([]string{"ws://", c.MlAddr(), mlEndpoint}, "")
+	addr := strings.Join([]string{"ws://", c.GetMlAddr(), mlEndpoint}, "")
 	fmt.Println(addr)
 	wsConn, _, err := websocket.DefaultDialer.Dial(addr, nil)
 	if err != nil {

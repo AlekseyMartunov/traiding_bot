@@ -4,11 +4,8 @@ package kucoinbots
 import (
 	"context"
 	"fmt"
-	"time"
 	"tradingbot/internal/kucoin/config"
-	kucoinentity "tradingbot/internal/kucoin/entity"
-	kucoincandles "tradingbot/internal/kucoin/http/candles"
-
+	kucoinaccount "tradingbot/internal/kucoin/http/account"
 	"tradingbot/pkg/logger"
 )
 
@@ -23,16 +20,17 @@ func Run(ctx context.Context) error {
 		return fmt.Errorf("creation logger error: %w", err)
 	}
 
-	candel := kucoincandles.New(log, &conf.Kucoin)
-	from := time.Date(
-		2024, 07, 0, 00, 00, 00, 00, time.UTC,
-	)
+	//candel := kucoincandles.New(log, &conf.Kucoin)
+	//from := time.Date(
+	//	2024, 07, 0, 00, 00, 00, 00, time.UTC,
+	//)
+	//
+	//to := time.Now()
+	//res, _ := candel.GetHistoricalData("SOL-USDT", kucoinentity.Day1, from, to)
+	//fmt.Println(res)
 
-	to := time.Now()
-	res, _ := candel.GetHistoricalData("SOL-USDT", kucoinentity.Day1, from, to)
-	fmt.Println(res)
-
-	//accountManager := kucoinaccount.New(logger, conf)
+	//accountManager :=
+	kucoinaccount.New(log, conf)
 	//accountManager.GetAccountInfo()
 
 	//pool, err := pgxpool.New(ctx, "postgres://test:test@localhost:5432/test")
@@ -64,8 +62,6 @@ func Run(ctx context.Context) error {
 	//	logger.Info(err.Error())
 	//}
 	//fmt.Println(i)
-
-	//accountManager := kucoinaccount.New(logger, conf)
 
 	//order := kucoinentity.MarketOrder{
 	//	OrderID:       "",

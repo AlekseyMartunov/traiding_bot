@@ -14,11 +14,11 @@ const (
 )
 
 type config interface {
-	Key() string
-	Secret() string
-	Version() string
-	PassPhrase() string
-	BaseEndpoint() string
+	GetKey() string
+	GetSecret() string
+	GetVersion() string
+	GetPassPhrase() string
+	GetBaseEndpoint() string
 }
 
 type logger interface {

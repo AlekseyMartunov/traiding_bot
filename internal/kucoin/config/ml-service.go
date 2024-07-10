@@ -4,6 +4,6 @@ type MlService struct {
 	Addr string `yaml:"addr"`
 }
 
-func (ml *MlService) MlAddr() string {
+func (ml *MlService) GetMlAddr() string {
 	return ml.Addr
 }

@@ -7,10 +7,6 @@ const (
 )
 
 type config interface {
-	GetKey() string
-	GetSecret() string
-	GetVersion() string
-	GetPassPhrase() string
 	GetBaseEndpoint() string
 }
 

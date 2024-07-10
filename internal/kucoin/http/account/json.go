@@ -7,40 +7,49 @@ import (
 
 // accountInfoJSON  helper dto struct.
 type accountInfoJSON struct {
-	Id        string `json:"id"`
-	Currency  string `json:"currency"`
-	Type      string `json:"type"`
-	Balance   string `json:"balance"`
-	Available string `json:"available"`
-	Holds     string `json:"holds"`
+	Code string `json:"code"`
+	Data []struct {
+		Id        string `json:"id"`
+		Currency  string `json:"currency"`
+		Type      string `json:"type"`
+		Balance   string `json:"balance"`
+		Available string `json:"available"`
+		Holds     string `json:"holds"`
+	} `json:"data"`
 }
 
-func (a *accountInfoJSON) toBaseEntity() (*kucoinentity.AccountInfo, error) {
-	var result kucoinentity.AccountInfo
+func (a *accountInfoJSON) toBaseEntity() ([]*kucoinentity.AccountInfo, error) {
+	result := make([]*kucoinentity.AccountInfo, 0, len(a.Data))
 
-	balance, err := strconv.ParseFloat(a.Balance, 64)
-	if err != nil {
-		return nil, err
+	for _, obj := range a.Data {
+		balance, err := strconv.ParseFloat(obj.Balance, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		available, err := strconv.ParseFloat(obj.Available, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		holds, err := strconv.ParseFloat(obj.Holds, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		e := kucoinentity.AccountInfo{}
+
+		e.ID = obj.Id
+		e.Currency = obj.Currency
+		e.Type = obj.Type
+		e.Balance = balance
+		e.Available = available
+		e.Holds = holds
+
+		result = append(result, &e)
 	}
 
-	available, err := strconv.ParseFloat(a.Available, 64)
-	if err != nil {
-		return nil, err
-	}
-
-	holds, err := strconv.ParseFloat(a.Holds, 64)
-	if err != nil {
-		return nil, err
-	}
-
-	result.ID = a.Id
-	result.Currency = a.Currency
-	result.Type = a.Type
-	result.Balance = balance
-	result.Available = available
-	result.Holds = holds
-
-	return &result, nil
+	return result, nil
 }
 
 // currencyConfigJSON helper dto struct.
