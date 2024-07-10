@@ -4,9 +4,11 @@ package kucoinbots
 import (
 	"context"
 	"fmt"
+	"time"
 	"tradingbot/internal/kucoin/config"
-	"tradingbot/internal/kucoin/websocket/exchange"
-	ml "tradingbot/internal/kucoin/websocket/prediction"
+	kucoinentity "tradingbot/internal/kucoin/entity"
+	kucoincandles "tradingbot/internal/kucoin/http/candles"
+
 	"tradingbot/pkg/logger"
 )
 
@@ -20,6 +22,15 @@ func Run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("creation logger error: %w", err)
 	}
+
+	candel := kucoincandles.New(log, &conf.Kucoin)
+	from := time.Date(
+		2024, 07, 0, 00, 00, 00, 00, time.UTC,
+	)
+
+	to := time.Now()
+	res, _ := candel.GetHistoricalData("SOL-USDT", kucoinentity.Day1, from, to)
+	fmt.Println(res)
 
 	//accountManager := kucoinaccount.New(logger, conf)
 	//accountManager.GetAccountInfo()
@@ -75,41 +86,41 @@ func Run(ctx context.Context) error {
 	//
 	//fmt.Println(orderManager.GetCurrencyConfig("WEST-USDT"))
 
-	mlService, err := ml.New(log, &conf.MlService)
-	if err != nil {
-		return fmt.Errorf("creating ml-service errpr: %w", err)
-	}
+	//mlService, err := ml.New(log, &conf.MlService)
+	//if err != nil {
+	//	return fmt.Errorf("creating ml-service errpr: %w", err)
+	//}
+	//
+	//kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", log, []string{"BTC-USDT", "ETH-USDT", "SOL-USDT"})
+	//if err != nil {
+	//	log.Error(err.Error())
+	//	return fmt.Errorf("creation kucoin websocket reciver error: %w", err)
+	//}
+	//ch := kucoinWSReceiver.Run(ctx)
 
-	kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", log, []string{"BTC-USDT", "ETH-USDT", "SOL-USDT"})
-	if err != nil {
-		log.Error(err.Error())
-		return fmt.Errorf("creation kucoin websocket reciver error: %w", err)
-	}
-	ch := kucoinWSReceiver.Run(ctx)
-
-	go func() {
-		for {
-			res, err := mlService.ReadMessage()
-			fmt.Println("result:", res)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			fmt.Println(res)
-		}
-	}()
-
-	for {
-		select {
-		case <-ctx.Done():
-		case t := <-ch:
-			err = mlService.SendMessage(t)
-			if err != nil {
-				fmt.Println(err)
-				return err
-			}
-		}
-	}
+	//go func() {
+	//	for {
+	//		res, err := mlService.ReadMessage()
+	//		fmt.Println("result:", res)
+	//		if err != nil {
+	//			fmt.Println(err)
+	//			return
+	//		}
+	//		fmt.Println(res)
+	//	}
+	//}()
+	//
+	//for {
+	//	select {
+	//	case <-ctx.Done():
+	//	case t := <-ch:
+	//		err = mlService.SendMessage(t)
+	//		if err != nil {
+	//			fmt.Println(err)
+	//			return err
+	//		}
+	//	}
+	//}
 
 	return nil
 }

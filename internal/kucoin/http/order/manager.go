@@ -8,7 +8,6 @@ import (
 const (
 	testEndpoint = "/api/v1/orders/test"
 	endpoint     = "/api/v1/orders"
-	baseEndpoint = "https://api.kucoin.com"
 )
 
 const (
@@ -20,6 +19,7 @@ type config interface {
 	Secret() string
 	Version() string
 	PassPhrase() string
+	BaseEndpoint() string
 }
 
 type logger interface {

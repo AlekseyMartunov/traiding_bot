@@ -13,11 +13,11 @@ import (
 
 type mockLogger struct{}
 
-func (m mockLogger) Trace(message string) {}
-func (m mockLogger) Debug(message string) {}
-func (m mockLogger) Info(message string)  {}
-func (m mockLogger) Warn(message string)  {}
-func (m mockLogger) Error(message string) {}
+func (m mockLogger) Debug(msg string, args ...any) {}
+func (m mockLogger) Info(msg string, args ...any)  {}
+func (m mockLogger) Warn(msg string, args ...any)  {}
+func (m mockLogger) Event(msg string, args ...any) {}
+func (m mockLogger) Error(msg string, args ...any) {}
 
 type mockConfig struct {
 	key          string

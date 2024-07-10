@@ -29,7 +29,7 @@ func (om *KucoinOrderManager) GetOrderDetail(orderID string) (*kucoinentity.Orde
 
 	response, err := om.client.R().
 		SetHeaders(headers).
-		Get(strings.Join([]string{baseEndpoint, url}, ""))
+		Get(strings.Join([]string{om.cfg.BaseEndpoint(), url}, ""))
 
 	if err != nil {
 		om.log.Error(err.Error())

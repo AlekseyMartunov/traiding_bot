@@ -43,7 +43,7 @@ func (om *KucoinOrderManager) PlaceMarketOrder(order *kucoinentity.MarketOrder) 
 	response, err := om.client.R().
 		SetBody(b).
 		SetHeaders(headers).
-		Post(strings.Join([]string{baseEndpoint, endpoint}, ""))
+		Post(strings.Join([]string{om.cfg.BaseEndpoint(), endpoint}, ""))
 
 	if err != nil {
 		om.log.Error(err.Error())
