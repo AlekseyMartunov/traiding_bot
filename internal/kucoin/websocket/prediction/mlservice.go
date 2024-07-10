@@ -2,9 +2,15 @@ package ml
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 	kucoinentity "tradingbot/internal/kucoin/entity"
 
 	"github.com/gorilla/websocket"
+)
+
+const (
+	mlEndpoint = "/v1/simple_average"
 )
 
 type config interface {
@@ -26,7 +32,9 @@ type PredictionService struct {
 }
 
 func New(l logger, c config) (*PredictionService, error) {
-	wsConn, _, err := websocket.DefaultDialer.Dial(c.MlAddr(), nil)
+	addr := strings.Join([]string{"ws://", c.MlAddr(), mlEndpoint}, "")
+	fmt.Println(addr)
+	wsConn, _, err := websocket.DefaultDialer.Dial(addr, nil)
 	if err != nil {
 		return nil, err
 	}

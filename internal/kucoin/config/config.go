@@ -11,7 +11,7 @@ type Config struct {
 	DB        `yaml:"database"`
 	Kucoin    `yaml:"kucoin"`
 	Logger    `yaml:"logger"`
-	MlService `yaml:"service"`
+	MlService `yaml:"ml-service"`
 }
 
 func New() (*Config, error) {

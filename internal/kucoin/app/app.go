@@ -74,7 +74,7 @@ func Run(ctx context.Context) error {
 	//}
 	//
 	//fmt.Println(orderManager.GetCurrencyConfig("WEST-USDT"))
-	fmt.Println(conf)
+
 	mlService, err := ml.New(log, &conf.MlService)
 	if err != nil {
 		return fmt.Errorf("creating ml-service errpr: %w", err)
