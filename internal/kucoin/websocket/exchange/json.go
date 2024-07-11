@@ -56,6 +56,10 @@ type subscribeMessage struct {
 	Response bool `json:"response"`
 }
 
+type rawMessage struct {
+	Type string `json:"type"`
+}
+
 // ticker contains info about pair
 type ticker struct {
 	Topic string `json:"topic"`

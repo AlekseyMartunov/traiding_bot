@@ -2,8 +2,8 @@ package ml
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
+
 	kucoinentity "tradingbot/internal/kucoin/entity"
 
 	"github.com/gorilla/websocket"
@@ -21,7 +21,6 @@ type logger interface {
 	Debug(msg string, args ...any)
 	Info(msg string, args ...any)
 	Warn(msg string, args ...any)
-	Event(msg string, args ...any)
 	Error(msg string, args ...any)
 }
 
@@ -33,7 +32,6 @@ type PredictionService struct {
 
 func New(l logger, c config) (*PredictionService, error) {
 	addr := strings.Join([]string{"ws://", c.GetMlAddr(), mlEndpoint}, "")
-	fmt.Println(addr)
 	wsConn, _, err := websocket.DefaultDialer.Dial(addr, nil)
 	if err != nil {
 		return nil, err
@@ -46,11 +44,11 @@ func New(l logger, c config) (*PredictionService, error) {
 	}, nil
 }
 
-func (ps *PredictionService) SendMessage(ticker *kucoinentity.Ticker) error {
-	dto := tickerDTO{}
-	dto.fromEntity(ticker)
+func (ps *PredictionService) SendTickerMessage(ticker *kucoinentity.Ticker) error {
+	j := tickerJSON{}
+	j.fromEntity(ticker)
 
-	b, err := json.Marshal(dto)
+	b, err := json.Marshal(j)
 	if err != nil {
 		return err
 	}
@@ -63,18 +61,28 @@ func (ps *PredictionService) SendMessage(ticker *kucoinentity.Ticker) error {
 	return nil
 }
 
-func (ps *PredictionService) ReadMessage() (*kucoinentity.MlResult, error) {
-	_, b, err := ps.conn.ReadMessage()
-	if err != nil {
-		return nil, err
-	}
+func (ps *PredictionService) Run() chan kucoinentity.MlServiceRawMessage {
+	ch := make(chan kucoinentity.MlServiceRawMessage)
+	go func() {
+		defer close(ch)
 
-	var dto mlResultDTO
+		for {
+			_, b, err := ps.conn.ReadMessage()
+			if err != nil {
+				ps.log.Error(err.Error())
+				continue
+			}
 
-	err = json.Unmarshal(b, &dto)
-	if err != nil {
-		return nil, err
-	}
+			var j kucoinentity.MlServiceRawMessage
+			err = json.Unmarshal(b, &j)
+			if err != nil {
+				ps.log.Error(err.Error())
+				continue
+			}
 
-	return dto.toEntity(), nil
+			ch <- j
+		}
+	}()
+
+	return ch
 }
