@@ -7,9 +7,8 @@ import (
 	"strings"
 	"time"
 	kucoinentity "tradingbot/internal/kucoin/entity"
-	kucoinheader "tradingbot/internal/kucoin/http/header"
-
 	kucoinerrors "tradingbot/internal/kucoin/errors"
+	"tradingbot/internal/kucoin/header"
 )
 
 // GetOrderDetail allows you to get info about the completed order.

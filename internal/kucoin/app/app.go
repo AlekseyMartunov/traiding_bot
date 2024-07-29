@@ -3,9 +3,11 @@ package kucoinbots
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+
 	"tradingbot/internal/kucoin/config"
-	kucoinaccount "tradingbot/internal/kucoin/http/account"
+	"tradingbot/internal/kucoin/websocket/wsclient"
 	"tradingbot/pkg/logger"
 )
 
@@ -20,103 +22,29 @@ func Run(ctx context.Context) error {
 		return fmt.Errorf("creation logger error: %w", err)
 	}
 
-	//candel := kucoincandles.New(log, &conf.Kucoin)
-	//from := time.Date(
-	//	2024, 07, 0, 00, 00, 00, 00, time.UTC,
-	//)
-	//
-	//to := time.Now()
-	//res, _ := candel.GetHistoricalData("SOL-USDT", kucoinentity.Day1, from, to)
-	//fmt.Println(res)
+	c, err := wsclient.New(log, conf)
+	if err != nil {
+		fmt.Println(err)
+	}
+	messages, errors, err := c.Connect(ctx)
 
-	//accountManager :=
-	kucoinaccount.New(log, conf)
-	//accountManager.GetAccountInfo()
+	c.Subscribe(wsclient.NewTickerSubscribeMessages("ETH-USDT", "SOL-USDT", "BTC-USDT"))
 
-	//pool, err := pgxpool.New(ctx, "postgres://test:test@localhost:5432/test")
-	//if err != nil {
-	//	return fmt.Errorf("connect to db error: %w", err)
-	//}
+	for {
+		select {
+		case m := <-messages:
+			b, _ := json.Marshal(m)
+			fmt.Println("MESSAGE:", string(b))
 
-	//storage := postgresRepo.NewStorage(pool)
-	//test := kucoinEntity.OrderDetailInfo{
-	//	Id:          "48jdshdjsnd",
-	//	Side:        "Sell",
-	//	ClientOid:   "clientoid",
-	//	Symbol:      "eth-BTC",
-	//	Funds:       "200",
-	//	Fee:         "123",
-	//	FeeCurrency: "USTD",
-	//	CreatedAt:   time.Now(),
-	//}
-	//
-	//err = storage.CloseMarketPosition(ctx, "bot1", &test)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
+		case e := <-errors:
+			b, _ := json.Marshal(e)
+			fmt.Println("ERROR:", string(b))
 
-	//orderManager := kucoinorders.NewKucoinOrderManager(logger, conf)
-	//i, err := orderManager.GetOrderDetail("")
-	//if err != nil {
-	//	fmt.Println(i)
-	//	logger.Info(err.Error())
-	//}
-	//fmt.Println(i)
+		case <-ctx.Done():
+			log.Info("app is shutdown")
+			return nil
+		}
 
-	//order := kucoinentity.MarketOrder{
-	//	OrderID:       "",
-	//	ClientOrderID: "84584",
-	//	Side:          kucoinentity.Sell,
-	//	Funds:         6.45,
-	//	Size:          0,
-	//	Pair:          "WEST-USDT",
-	//	Time:          time.Time{},
-	//}
-	//
-	//orderManager := kucoinorders.NewKucoinOrderManager(logger, conf)
-	//
-	//err = orderManager.PlaceMarketOrder(&order)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//
-	//fmt.Println(orderManager.GetCurrencyConfig("WEST-USDT"))
-
-	//mlService, err := ml.New(log, &conf.MlService)
-	//if err != nil {
-	//	return fmt.Errorf("creating ml-service errpr: %w", err)
-	//}
-	//
-	//kucoinWSReceiver, err := kucoinreceiver.NewReceiver("", log, []string{"BTC-USDT", "ETH-USDT", "SOL-USDT"})
-	//if err != nil {
-	//	log.Error(err.Error())
-	//	return fmt.Errorf("creation kucoin websocket reciver error: %w", err)
-	//}
-	//ch := kucoinWSReceiver.Run(ctx)
-
-	//go func() {
-	//	for {
-	//		res, err := mlService.ReadMessage()
-	//		fmt.Println("result:", res)
-	//		if err != nil {
-	//			fmt.Println(err)
-	//			return
-	//		}
-	//		fmt.Println(res)
-	//	}
-	//}()
-	//
-	//for {
-	//	select {
-	//	case <-ctx.Done():
-	//	case t := <-ch:
-	//		err = mlService.SendMessage(t)
-	//		if err != nil {
-	//			fmt.Println(err)
-	//			return err
-	//		}
-	//	}
-	//}
-
+	}
 	return nil
 }

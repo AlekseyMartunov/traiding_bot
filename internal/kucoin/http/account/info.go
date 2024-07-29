@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"tradingbot/internal/kucoin/header"
 
 	"tradingbot/internal/kucoin/entity"
 	kucoinerrors "tradingbot/internal/kucoin/errors"
-	kucoinheader "tradingbot/internal/kucoin/http/header"
 )
 
 // GetAccountInfo returns info about all currency accounts.

@@ -17,7 +17,7 @@ type Config struct {
 func New() (*Config, error) {
 	configPath, ok := os.LookupEnv("CONFIG_PATH_KUCOIN")
 	if !ok {
-		return nil, fmt.Errorf("environment CONFIG_PATH not set")
+		return nil, fmt.Errorf("environment CONFIG_PATH_KUCOIN not set")
 	}
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {

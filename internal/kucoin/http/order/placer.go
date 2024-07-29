@@ -7,10 +7,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"tradingbot/internal/kucoin/errors"
-	kucoinheader "tradingbot/internal/kucoin/http/header"
-
 	"tradingbot/internal/kucoin/entity"
+	"tradingbot/internal/kucoin/errors"
+	"tradingbot/internal/kucoin/header"
 )
 
 // PlaceMarketOrder takes the MarketOrder struct and places it in kucoin.
