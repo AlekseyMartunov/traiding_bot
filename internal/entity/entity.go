@@ -39,12 +39,12 @@ type OrderDetailInfo struct {
 	OpType        string
 	Type          string
 	Side          string
-	Price         string
-	Size          string
-	Funds         string
-	DealFunds     string
-	DealSize      string
-	Fee           string
+	Price         float64
+	Size          float64
+	Funds         float64
+	DealFunds     float64
+	DealSize      float64
+	Fee           float64
 	FeeCurrency   string
 	Stp           string
 	Stop          string
@@ -84,15 +84,15 @@ type CurrencyConfig struct {
 	QuoteCurrency   string
 	FeeCurrency     string
 	Market          string
-	BaseMinSize     string
-	QuoteMinSize    string
-	BaseMaxSize     string
-	QuoteMaxSize    string
-	BaseIncrement   string
-	QuoteIncrement  string
-	PriceIncrement  string
-	PriceLimitRate  string
-	MinFunds        string
+	BaseMinSize     float64
+	QuoteMinSize    float64
+	BaseMaxSize     float64
+	QuoteMaxSize    float64
+	BaseIncrement   float64
+	QuoteIncrement  float64
+	PriceIncrement  float64
+	PriceLimitRate  float64
+	MinFunds        float64
 	IsMarginEnabled bool
 	EnableTrading   bool
 }

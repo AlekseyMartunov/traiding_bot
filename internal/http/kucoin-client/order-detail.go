@@ -3,6 +3,7 @@ package httpclient
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -42,20 +43,50 @@ type orderDetailJSON struct {
 	TradeType     string      `json:"tradeType"`
 }
 
-func (o *orderDetailJSON) toBaseEntity() *kucoinentity.OrderDetailInfo {
+func (o *orderDetailJSON) toBaseEntity() (*kucoinentity.OrderDetailInfo, error) {
 	var result kucoinentity.OrderDetailInfo
+
+	Price, err := strconv.ParseFloat(o.Price, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	Size, err := strconv.ParseFloat(o.Size, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	Funds, err := strconv.ParseFloat(o.Funds, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	DealFunds, err := strconv.ParseFloat(o.DealFunds, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	DealSize, err := strconv.ParseFloat(o.DealSize, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	Fee, err := strconv.ParseFloat(o.Fee, 10)
+	if err != nil {
+		return nil, err
+	}
 
 	result.Id = o.Id
 	result.Symbol = o.Symbol
 	result.OpType = o.OpType
 	result.Type = o.Type
 	result.Side = o.Side
-	result.Price = o.Price
-	result.Size = o.Size
-	result.Funds = o.Funds
-	result.DealFunds = o.DealFunds
-	result.DealSize = o.DealSize
-	result.Fee = o.Fee
+	result.Price = Price
+	result.Size = Size
+	result.Funds = Funds
+	result.DealFunds = DealFunds
+	result.DealSize = DealSize
+	result.Fee = Fee
 	result.FeeCurrency = o.FeeCurrency
 	result.Stp = o.Stp
 	result.Stop = o.Stop
@@ -76,7 +107,7 @@ func (o *orderDetailJSON) toBaseEntity() *kucoinentity.OrderDetailInfo {
 	result.CreatedAt = time.Unix(o.CreatedAt, 0)
 	result.TradeType = o.TradeType
 
-	return &result
+	return &result, nil
 }
 
 func (hc *HTTPClient) OrderDetail(orderID string) (*kucoinentity.OrderDetailInfo, error) {
@@ -106,12 +137,17 @@ func (hc *HTTPClient) OrderDetail(orderID string) (*kucoinentity.OrderDetailInfo
 		return nil, hc.logAndReturnWrappedErr("handle order detail response err", err)
 	}
 
-	res := &orderDetailJSON{}
+	j := &orderDetailJSON{}
 
-	if err = json.Unmarshal(b, res); err != nil {
+	if err = json.Unmarshal(b, j); err != nil {
 		return nil, hc.logAndReturnWrappedErr("unmarshal order detail err", err)
 	}
 
-	return res.toBaseEntity(), nil
+	base, err := j.toBaseEntity()
+	if err != nil {
+		return nil, hc.logAndReturnWrappedErr("order detail parsing err", err)
+	}
+
+	return base, nil
 
 }

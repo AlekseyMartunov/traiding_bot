@@ -27,6 +27,10 @@ type marketOrderJSON struct {
 	Funds float64 `json:"funds"`
 }
 
+type orderIDJSON struct {
+	orderId string `json:"orderId"`
+}
+
 func (hc *HTTPClient) PlaceMarketOrder(order *kucoinentity.MarketOrder) error {
 	body := marketOrderJSON{
 		ClientOrderID: order.ClientOrderID,
@@ -61,10 +65,18 @@ func (hc *HTTPClient) PlaceMarketOrder(order *kucoinentity.MarketOrder) error {
 		return hc.logAndReturnWrappedErr("market order request err", err)
 	}
 
-	_, err = hc.handleResponse(resp)
+	b, err = hc.handleResponse(resp)
 	if err != nil {
 		hc.logAndReturnWrappedErr("handle market order response err", err)
 	}
+
+	j := &orderIDJSON{}
+
+	if err = json.Unmarshal(b, j); err != nil {
+		return hc.logAndReturnWrappedErr("unmarshal market order err", err)
+	}
+
+	order.OrderID = j.orderId
 
 	return nil
 }

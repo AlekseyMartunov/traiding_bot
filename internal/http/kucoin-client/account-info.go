@@ -80,7 +80,7 @@ func (hc *HTTPClient) AccountInfo() ([]*kucoinentity.AccountInfo, error) {
 	for _, j := range jsonArr {
 		e, err := j.toBaseEntity()
 		if err != nil {
-			return nil, hc.logAndReturnWrappedErr("account info float parsing err", err)
+			return nil, hc.logAndReturnWrappedErr("account info parsing err", err)
 		}
 		entityArr = append(entityArr, e)
 	}
