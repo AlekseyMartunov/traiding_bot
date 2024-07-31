@@ -21,7 +21,7 @@ func Run(ctx context.Context) error {
 		return fmt.Errorf("creation logger error: %w", err)
 	}
 
-	client := httpclient.New(log, &conf.Kucoin, kucoinheader.CreateSecretsHeaders)
+	httpclient.New(log, &conf.Kucoin, kucoinheader.CreateSecretsHeaders)
 
 	//c, err := wsClient.New(log, conf)
 	//if err != nil {

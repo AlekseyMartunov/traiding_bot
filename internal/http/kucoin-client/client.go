@@ -16,6 +16,7 @@ const (
 	accountEndpoint    = "/api/v1/accounts"
 	symbolListEndpoint = "/api/v2/symbols"
 	candlesEndpoint    = "/api/v1/market/candles"
+	stopOrderEndpoint  = "/api/v1/stop-order"
 )
 
 const (

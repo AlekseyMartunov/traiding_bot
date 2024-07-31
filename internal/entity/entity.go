@@ -29,6 +29,49 @@ type MarketOrder struct {
 	// BTC-USDT
 	Pair string
 
+	// Remark, length cannot exceed 50 characters (ASCII)
+	Remark string
+
+	Time time.Time
+}
+
+type StopOrderTrigger string
+
+// loss : Triggers when the last trade price changes to a value at or below the stopPrice.
+// entry : Triggers when the last trade price changes to a value at or above the stopPrice.
+const (
+	loss  StopOrderTrigger = "loss"
+	entry StopOrderTrigger = "entry"
+)
+
+type StopOrder struct {
+	// order id returned by server, ClientOrderID is different from the OrderID
+	OrderID string
+
+	// client side uuid for order
+	ClientOrderID string
+
+	// sell or buy
+	Side Side
+
+	// BTC-USDT
+	Pair string
+
+	// Order placement remarks, length cannot exceed 100 characters (UTF-8)
+	Remark string
+
+	// Either loss or entry, the default is loss. Requires stopPrice to be defined.
+	Stop StopOrderTrigger
+
+	// trigger price.
+	StopPrice float64
+
+	// Specify quantity for currency
+	Size float64
+
+	// Specify price for currency
+	Price float64
+
 	Time time.Time
 }
 
