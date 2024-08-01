@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"strconv"
 	"strings"
 	"sync"
@@ -16,12 +17,53 @@ import (
 )
 
 const (
-	websocketEndpoint = "/api/v1/bullet-public"
+	publicEndpoint = "/api/v1/bullet-public"
+	privetEndpoint = "/api/v1/bullet-private"
 )
 
 const (
 	defaultTimeout = time.Second * 10
 )
+
+var (
+	onlyPublicMessagesErr       = errors.New("the client can only subscribe to public messages")
+	onlyPrivetMessagesErr       = errors.New("the client can only subscribe to privet messages")
+	differentTypesOfMessagesErr = errors.New("different types of messages")
+)
+
+// Types of subscriptions
+const (
+	// Public channels
+	ticker  = "/market/ticker"
+	candles = "/market/candles"
+
+	// Privet channels
+	privetOrderChange    = "/spotMarket/tradeOrders"
+	privetOrderChangeV2  = "/spotMarket/tradeOrdersV2"
+	accountBalanceChange = "/account/balance"
+	stopOrderEvent       = "/spotMarket/advancedOrders"
+)
+
+var (
+	allPublicTopics = []string{ticker, candles}
+	allPrivetTopics = []string{privetOrderChange, privetOrderChangeV2, accountBalanceChange, stopOrderEvent}
+)
+
+// Websocket message types
+const (
+	WelcomeMessage     = "welcome"
+	PingMessage        = "ping"
+	PongMessage        = "pong"
+	SubscribeMessage   = "subscribe"
+	AckMessage         = "ack"
+	UnSubscribeMessage = "unsubscribe"
+	ErrorMessage       = "error"
+	Message            = "message"
+	Notice             = "notice"
+	Command            = "command"
+)
+
+type headerFunc func(method, url, body, secret, passPhrase, key, version string, now time.Time) map[string]string
 
 type httpConfig struct {
 	Code string        `json:"code"`
@@ -62,19 +104,6 @@ type rawMessage struct {
 	RawData json.RawMessage `json:"data"`
 }
 
-const (
-	WelcomeMessage     = "welcome"
-	PingMessage        = "ping"
-	PongMessage        = "pong"
-	SubscribeMessage   = "subscribe"
-	AckMessage         = "ack"
-	UnsubscribeMessage = "unsubscribe"
-	ErrorMessage       = "error"
-	Message            = "message"
-	Notice             = "notice"
-	Command            = "command"
-)
-
 type wsMessageResponse struct {
 	Id   string `json:"id"`
 	Type string `json:"type"`
@@ -103,26 +132,6 @@ func newPingMessage() *wsMessageResponse {
 	}
 }
 
-func NewTickerSubscribeMessages(pairs ...string) subscribeMessage {
-	return subscribeMessage{
-		Id:             strconv.FormatInt(time.Now().UnixNano(), 10),
-		Type:           SubscribeMessage,
-		Topic:          fmt.Sprintf("/market/ticker:%s", strings.Join(pairs, ",")),
-		PrivateChannel: false,
-		Response:       true,
-	}
-}
-
-func NewTickerUnSubscribeMessages(pairs ...string) subscribeMessage {
-	return subscribeMessage{
-		Id:             strconv.FormatInt(time.Now().UnixNano(), 10),
-		Type:           UnsubscribeMessage,
-		Topic:          fmt.Sprintf("/market/ticker:%s", strings.Join(pairs, ",")),
-		PrivateChannel: false,
-		Response:       true,
-	}
-}
-
 type logger interface {
 	Debug(msg string, args ...any)
 	Info(msg string, args ...any)
@@ -131,7 +140,11 @@ type logger interface {
 }
 
 type config interface {
-	GetBaseEndpoint() string
+	Key() string
+	Secret() string
+	Version() string
+	PassPhrase() string
+	BaseEndpoint() string
 }
 
 type WsClient struct {
@@ -148,9 +161,11 @@ type WsClient struct {
 	token       string
 	server      *instanceServer
 	timeout     time.Duration
+	headerFunc  headerFunc
+	private     bool
 }
 
-func New(l logger, c config) (*WsClient, error) {
+func New(l logger, c config, f headerFunc, private bool) (*WsClient, error) {
 	ws := WsClient{
 		cfg: c,
 		log: l,
@@ -162,8 +177,10 @@ func New(l logger, c config) (*WsClient, error) {
 		send:        make(chan string),
 		rawMessages: make(chan *rawMessage, 1024),
 
-		wg:      &sync.WaitGroup{},
-		timeout: defaultTimeout,
+		wg:         &sync.WaitGroup{},
+		headerFunc: f,
+		timeout:    defaultTimeout,
+		private:    private,
 	}
 
 	err := ws.getConfigMessage()
@@ -175,9 +192,32 @@ func New(l logger, c config) (*WsClient, error) {
 }
 
 func (ws *WsClient) getConfigMessage() error {
-	url := strings.Join([]string{ws.cfg.GetBaseEndpoint(), websocketEndpoint}, "")
+	var url string
 
-	resp, err := resty.New().R().Post(url)
+	if ws.private {
+		url = strings.Join([]string{ws.cfg.BaseEndpoint(), privetEndpoint}, "")
+	} else {
+		url = strings.Join([]string{ws.cfg.BaseEndpoint(), publicEndpoint}, "")
+	}
+
+	request := resty.New().R()
+
+	if ws.private {
+		request.SetHeaders(
+			ws.headerFunc(
+				http.MethodPost,
+				privetEndpoint,
+				"",
+				ws.cfg.Secret(),
+				ws.cfg.PassPhrase(),
+				ws.cfg.Key(),
+				ws.cfg.Version(),
+				time.Now(),
+			),
+		)
+	}
+
+	resp, err := request.Post(url)
 	if err != nil {
 		ws.log.Error(err.Error())
 		return err
@@ -337,7 +377,17 @@ func (ws *WsClient) pingMessage(ctx context.Context) {
 
 }
 
-func (ws *WsClient) Subscribe(messages ...subscribeMessage) {
+func (ws *WsClient) Subscribe(messages ...subscribeMessage) error {
+	if ws.private {
+		if !allTypesOfMessagesInGroup(allPrivetTopics, messages...) {
+			return onlyPrivetMessagesErr
+		}
+	} else {
+		if !allTypesOfMessagesInGroup(allPublicTopics, messages...) {
+			return onlyPublicMessagesErr
+		}
+	}
+
 	for _, m := range messages {
 		ws.log.Debug(fmt.Sprintf("send message: %s", toStringFromJson(m)))
 
@@ -348,11 +398,19 @@ func (ws *WsClient) Subscribe(messages ...subscribeMessage) {
 			if id != m.Id {
 				ws.errors <- errors.New(fmt.Sprintf("invalid received ack id, expected: %s, actual: %s", m.Id, id))
 			}
+			ws.log.Debug(fmt.Sprintf("Sucsessful subscribing: %s", m.Topic))
+
+		case err := <-ws.errors:
+			ws.log.Error(err.Error())
+			return err
 
 		case <-time.After(ws.timeout):
+			ws.log.Warn("ack message timeout")
 			ws.errors <- errors.New("ack message timeout")
 		}
 	}
+
+	return nil
 }
 
 func (ws *WsClient) write(ctx context.Context) {
@@ -380,4 +438,25 @@ func toStringFromJson(v interface{}) string {
 		return ""
 	}
 	return string(b)
+}
+
+func allTypesOfMessagesInGroup(group []string, messages ...subscribeMessage) bool {
+	for _, m := range messages {
+		s := m.Topic
+		if !in(s, group) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// in returns true if at least one topic starts with base
+func in(base string, topic []string) bool {
+	for _, prefix := range topic {
+		if strings.HasPrefix(base, prefix) {
+			return true
+		}
+	}
+	return false
 }

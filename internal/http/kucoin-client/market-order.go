@@ -28,7 +28,7 @@ type marketOrderJSON struct {
 }
 
 type orderIDJSON struct {
-	orderId string `json:"orderId"`
+	OrderId string `json:"orderId"`
 }
 
 func (hc *HTTPClient) PlaceMarketOrder(order *kucoinentity.MarketOrder) error {
@@ -76,7 +76,7 @@ func (hc *HTTPClient) PlaceMarketOrder(order *kucoinentity.MarketOrder) error {
 		return hc.logAndReturnWrappedErr("unmarshal market order err", err)
 	}
 
-	order.OrderID = j.orderId
+	order.OrderID = j.OrderId
 
 	return nil
 }

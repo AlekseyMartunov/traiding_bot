@@ -3,10 +3,15 @@ package kucoinbots
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strconv"
+	"time"
 	"tradingbot/internal/config"
-	kucoinheader "tradingbot/internal/http/header"
+	kucoinentity "tradingbot/internal/entity"
 	httpclient "tradingbot/internal/http/kucoin-client"
+	kucoinheader "tradingbot/internal/secrets-header"
+	wsClient "tradingbot/internal/websocket/kucoin-client"
 	"tradingbot/pkg/logger"
 )
 
@@ -21,31 +26,59 @@ func Run(ctx context.Context) error {
 		return fmt.Errorf("creation logger error: %w", err)
 	}
 
-	httpclient.New(log, &conf.Kucoin, kucoinheader.CreateSecretsHeaders)
+	webSocketClient, err := wsClient.New(log, conf, kucoinheader.CreateSecretsHeaders, true)
+	if err != nil {
+		return err
+	}
+	messages, errors, err := webSocketClient.Connect(ctx)
 
-	//c, err := wsClient.New(log, conf)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//messages, errors, err := c.Connect(ctx)
-	//
-	//c.Subscribe(wsClient.NewTickerSubscribeMessages("ETH-USDT", "SOL-USDT", "BTC-USDT"))
+	err = webSocketClient.Subscribe(
+		wsClient.NewAccountBalanceChangeMessageSubscribe(),
+		wsClient.NewOrderChangeMessageSubscribe(),
+	)
+	if err != nil {
+		return err
+	}
 
-	//for {
-	//	select {
-	//	case m := <-messages:
-	//		b, _ := json.Marshal(m)
-	//		fmt.Println("MESSAGE:", string(b))
-	//
-	//	case e := <-errors:
-	//		b, _ := json.Marshal(e)
-	//		fmt.Println("ERROR:", string(b))
-	//
-	//	case <-ctx.Done():
-	//		log.Info("app is shutdown")
-	//		return nil
-	//	}
-	//
-	//}
+	clientHTTP := httpclient.New(log, &conf.Kucoin, kucoinheader.CreateSecretsHeaders)
+
+	go func() {
+		time.Sleep(time.Second * 5)
+		order := kucoinentity.MarketOrder{
+			OrderID:       "",
+			ClientOrderID: strconv.FormatInt(time.Now().UnixNano(), 10),
+			Side:          kucoinentity.Buy,
+			Funds:         10,
+			Pair:          "SOL-USDT",
+			Remark:        "",
+			Time:          time.Now(),
+		}
+
+		err := clientHTTP.PlaceMarketOrder(&order)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println("ORDER_ID", order.OrderID)
+	}()
+
+	for {
+		select {
+		case m := <-messages:
+			b, _ := json.Marshal(m)
+			fmt.Println("MESSAGE:", string(b))
+
+		case e := <-errors:
+			b, _ := json.Marshal(e)
+			fmt.Println("ERROR:", string(b))
+
+		case <-ctx.Done():
+			log.Info("app is shutdown")
+			return nil
+		}
+
+	}
 	return nil
 }
+
+// export CONFIG_PATH_KUCOIN=config/config.yaml

@@ -74,7 +74,7 @@ func (hc *HTTPClient) PlaceStopOrder(o *kucoinentity.StopOrder) error {
 		return hc.logAndReturnWrappedErr("unmarshal stop order err", err)
 	}
 
-	o.OrderID = j.orderId
+	o.OrderID = j.OrderId
 
 	return nil
 }
