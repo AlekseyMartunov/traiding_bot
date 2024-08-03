@@ -40,8 +40,8 @@ type StopOrderTrigger string
 // loss : Triggers when the last trade price changes to a value at or below the stopPrice.
 // entry : Triggers when the last trade price changes to a value at or above the stopPrice.
 const (
-	loss  StopOrderTrigger = "loss"
-	entry StopOrderTrigger = "entry"
+	Loss  StopOrderTrigger = "loss"
+	Entry StopOrderTrigger = "entry"
 )
 
 type StopOrder struct {
@@ -81,7 +81,7 @@ type OrderDetailInfo struct {
 	Symbol        string
 	OpType        string
 	Type          string
-	Side          string
+	Side          Side
 	Price         float64
 	Size          float64
 	Funds         float64
@@ -101,12 +101,46 @@ type OrderDetailInfo struct {
 	CancelAfter   int
 	Channel       string
 	ClientOid     string
-	Remark        interface{}
-	Tags          interface{}
+	Remark        string
+	Tags          string
 	IsActive      bool
 	CancelExist   bool
 	CreatedAt     time.Time
 	TradeType     string
+}
+
+type StopOrderDetailInfo struct {
+	Id              string
+	Symbol          string
+	UserId          string
+	Status          string
+	Type            string
+	Side            Side
+	Price           float64
+	Size            float64
+	Funds           string
+	Stp             string
+	TimeInForce     string
+	CancelAfter     time.Time
+	PostOnly        bool
+	Hidden          bool
+	Iceberg         bool
+	VisibleSize     string
+	Channel         string
+	ClientOid       string
+	Remark          string
+	Tags            string
+	OrderTime       time.Time
+	DomainId        string
+	TradeSource     string
+	TradeType       string
+	FeeCurrency     string
+	TakerFeeRate    float64
+	MakerFeeRate    float64
+	CreatedAt       time.Time
+	Stop            StopOrderTrigger
+	StopTriggerTime time.Time
+	StopPrice       float64
 }
 
 // AccountInfo contains info about currency accounts.

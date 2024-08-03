@@ -11,36 +11,36 @@ import (
 )
 
 type orderDetailJSON struct {
-	Id            string      `json:"id"`
-	Symbol        string      `json:"symbol"`
-	OpType        string      `json:"opType"`
-	Type          string      `json:"type"`
-	Side          string      `json:"side"`
-	Price         string      `json:"price"`
-	Size          string      `json:"size"`
-	Funds         string      `json:"funds"`
-	DealFunds     string      `json:"dealFunds"`
-	DealSize      string      `json:"dealSize"`
-	Fee           string      `json:"fee"`
-	FeeCurrency   string      `json:"feeCurrency"`
-	Stp           string      `json:"stp"`
-	Stop          string      `json:"stop"`
-	StopTriggered bool        `json:"stopTriggered"`
-	StopPrice     string      `json:"stopPrice"`
-	TimeInForce   string      `json:"timeInForce"`
-	PostOnly      bool        `json:"postOnly"`
-	Hidden        bool        `json:"hidden"`
-	Iceberg       bool        `json:"iceberg"`
-	VisibleSize   string      `json:"visibleSize"`
-	CancelAfter   int         `json:"cancelAfter"`
-	Channel       string      `json:"channel"`
-	ClientOid     string      `json:"clientOid"`
-	Remark        interface{} `json:"remark"`
-	Tags          interface{} `json:"tags"`
-	IsActive      bool        `json:"isActive"`
-	CancelExist   bool        `json:"cancelExist"`
-	CreatedAt     int64       `json:"createdAt"`
-	TradeType     string      `json:"tradeType"`
+	Id            string            `json:"id"`
+	Symbol        string            `json:"symbol"`
+	OpType        string            `json:"opType"`
+	Type          string            `json:"type"`
+	Side          kucoinentity.Side `json:"side"`
+	Price         string            `json:"price"`
+	Size          string            `json:"size"`
+	Funds         string            `json:"funds"`
+	DealFunds     string            `json:"dealFunds"`
+	DealSize      string            `json:"dealSize"`
+	Fee           string            `json:"fee"`
+	FeeCurrency   string            `json:"feeCurrency"`
+	Stp           string            `json:"stp"`
+	Stop          string            `json:"stop"`
+	StopTriggered bool              `json:"stopTriggered"`
+	StopPrice     string            `json:"stopPrice"`
+	TimeInForce   string            `json:"timeInForce"`
+	PostOnly      bool              `json:"postOnly"`
+	Hidden        bool              `json:"hidden"`
+	Iceberg       bool              `json:"iceberg"`
+	VisibleSize   string            `json:"visibleSize"`
+	CancelAfter   int               `json:"cancelAfter"`
+	Channel       string            `json:"channel"`
+	ClientOid     string            `json:"clientOid"`
+	Remark        string            `json:"remark"`
+	Tags          string            `json:"tags"`
+	IsActive      bool              `json:"isActive"`
+	CancelExist   bool              `json:"cancelExist"`
+	CreatedAt     int64             `json:"createdAt"`
+	TradeType     string            `json:"tradeType"`
 }
 
 func (o *orderDetailJSON) toBaseEntity() (*kucoinentity.OrderDetailInfo, error) {

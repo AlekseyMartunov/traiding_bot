@@ -60,6 +60,7 @@ func New(l logger, c config, f headerFunc) *HTTPClient {
 }
 
 func (hc *HTTPClient) handleResponse(response *resty.Response) ([]byte, error) {
+	hc.log.Debug(fmt.Sprintf("code: %d, message: %s", response.StatusCode(), string(response.Body())))
 	if response.StatusCode() != http.StatusOK {
 		return nil, errors.New("response status code not equal 200")
 	}
@@ -68,8 +69,6 @@ func (hc *HTTPClient) handleResponse(response *resty.Response) ([]byte, error) {
 	if err := json.Unmarshal(response.Body(), raw); err != nil {
 		return nil, errors.New(fmt.Sprintf("unmarsahl json err: %s", err.Error()))
 	}
-
-	hc.log.Debug(fmt.Sprintf("recive a message: %s", toStringFromJson(raw)))
 
 	if raw.Code != successfulCode {
 		hc.log.Error(fmt.Sprintf("kucoin exchange err: %s", toStringFromJson(raw)))
